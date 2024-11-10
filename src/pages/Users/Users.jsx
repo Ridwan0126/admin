@@ -3,9 +3,10 @@ import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
 
-// Sample data
+// Sample data with unique IDs
 const initialData = [
   {
+    id: '1',  // Menambahkan ID unik
     name: "Agus Santoso sip",
     email: "agussantos@gmail.com",
     number: "085312345678",
@@ -14,6 +15,7 @@ const initialData = [
     status: "Aktif",
   },
   {
+    id: '2',  // Menambahkan ID unik
     name: "Agus Santoso",
     email: "agussantos@gmail.com",
     number: "085312345678",
@@ -22,6 +24,7 @@ const initialData = [
     status: "Aktif",
   },
   {
+    id: '3',  // Menambahkan ID unik
     name: "ahmad Agus Santoso",
     email: "agussantos@gmail.com",
     number: "085312345678",
@@ -29,8 +32,16 @@ const initialData = [
     role: "Admin",
     status: "Aktif",
   },
+  {
+    id: '4',  // Menambahkan ID unik
+    name: "kepin yoga",
+    email: "kepin@gmail.com",
+    number: "085312345678",
+    addres: "Jl Melati No. 12 Komplek",
+    role: "Admin",
+    status: "Aktif",
+  },
 ];
-
 
 const UsersContent = ({ searchQuery = '' }) => {
   const [data, setData] = useState(initialData);
@@ -47,7 +58,6 @@ const UsersContent = ({ searchQuery = '' }) => {
     { key: 'status', label: 'Status' }
   ];
 
-  // Define card sections for mobile view
   const cardSections = [
     {
       title: 'Personal Info',
@@ -57,7 +67,6 @@ const UsersContent = ({ searchQuery = '' }) => {
         { key: 'number', label: 'Nomor Telepon' },
         { key: 'addres', label: 'Alamat' },
         { key: 'role', label: 'Role' },
-        { key: 'status', label: 'Status' }
       ]
     }
   ];
@@ -86,12 +95,21 @@ const UsersContent = ({ searchQuery = '' }) => {
     }
   };
 
+  // Perbaikan fungsi handleUpdate
   const handleUpdate = (updatedData) => {
-    setData(prevData =>
-      prevData.map(item =>
-        item.id === updatedData.id ? updatedData : item
-      )
-    );
+    setData(prevData => {
+      return prevData.map(item => {
+        // Hanya update data dengan ID yang sesuai
+        if (item.id === selectedData.id) {
+          return {
+            ...item,
+            ...updatedData
+          };
+        }
+        return item;
+      });
+    });
+    
     setIsEditModalOpen(false);
     setSelectedData(null);
   };
@@ -104,22 +122,20 @@ const UsersContent = ({ searchQuery = '' }) => {
 
   return (
     <div>
-      {/* Page Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold">Daftar Pengantaran Sampah</h2>
+        <h2 className="text-xl font-semibold">Daftar Admin</h2>
         <p className="text-sm text-gray-500">This is a list of latest Orders</p>
       </div>
 
-      {/* Desktop Table View */}
       <DataTable 
         data={filteredData}
         columns={columns}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         getStatusBadgeClass={getStatusBadgeClass}
+        contentType='users'
       />
 
-      {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {filteredData.map((row) => (
           <DataCard 
@@ -128,11 +144,11 @@ const UsersContent = ({ searchQuery = '' }) => {
             sections={cardSections}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
+            contentType='users'
           />
         ))}
       </div>
 
-      {/* Edit Modal */}
       {selectedData && (
         <EditModal
           isOpen={isEditModalOpen}
@@ -143,10 +159,10 @@ const UsersContent = ({ searchQuery = '' }) => {
           data={selectedData}
           fields={columns.filter(col => col.key !== 'id')}
           onUpdate={handleUpdate}
+          contentType='users'
         />
       )}
 
-      {/* No Results Message */}
       {filteredData.length === 0 && (
         <div className="text-center py-8">
           <p className="text-gray-500">Tidak ada data yang ditemukan</p>

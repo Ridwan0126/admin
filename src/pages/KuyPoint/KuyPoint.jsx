@@ -10,7 +10,7 @@ const initialData = [
     name: "Agus Santoso",
     wallet: "Dana",
     number: "085312345678",
-    point: "$40.000",
+    point: "40.000",
     give: "Rp.100.000",
     status: "Berhasil",
   },
@@ -19,7 +19,7 @@ const initialData = [
     name: "Budi Utomo",
     wallet: "Ovo",
     number: "085312345679",
-    point: "$15.000",
+    point: "15.000",
     give: "Rp.40.000",
     status: "Berhasil",
   },
@@ -105,7 +105,7 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     <div>
       {/* Page Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold">Daftar Pengantaran Sampah</h2>
+        <h2 className="text-xl font-semibold">Riwayat Penukaran Poin</h2>
         <p className="text-sm text-gray-500">This is a list of latest Orders</p>
       </div>
 

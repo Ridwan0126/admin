@@ -1,7 +1,42 @@
 import React from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 
-const DataTable = ({ data, columns, handleEdit, handleDelete, getStatusBadgeClass }) => {
+const DataTable = ({ data, columns, handleEdit, handleDelete, contentType = 'default' }) => {
+  const getStatusBadgeClass = (status) => {
+    if (contentType === 'users') {
+      switch (status?.toLowerCase()) {
+        case 'aktif':
+          return 'bg-green-100 text-green-800';
+        case 'nonaktif':
+          return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+    switch (status) {
+      case 'Berhasil':
+        return 'bg-green-100 text-green-800';
+      case 'Gagal':
+        return 'bg-red-100 text-red-800';
+      case 'Proses':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getRoleBadgeClass = (role) => {
+    let baseClasses = 'rounded-full text-xs';
+
+    if (role?.toLowerCase() === 'admin') {
+      baseClasses += ' bg-customTeal text-white';
+      baseClasses += ' sm:px-2 sm:py-1'; // Desktop styles
+      baseClasses += ' px-1 py-0.5'; // Mobile/Tablet styles
+    }
+
+    return baseClasses;
+  };
+
   return (
     <div className="hidden lg:block">
       <div className="bg-white rounded-lg shadow overflow-x-auto">
@@ -22,7 +57,11 @@ const DataTable = ({ data, columns, handleEdit, handleDelete, getStatusBadgeClas
                 {columns.map(column => (
                   <td key={`${row.id}-${column.key}`} className="p-3">
                     {column.key === 'status' ? (
-                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(row.status)}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(row[column.key])}`}>
+                        {row[column.key]}
+                      </span>
+                    ) : column.key === 'role' ? (
+                      <span className={getRoleBadgeClass(row[column.key])}>
                         {row[column.key]}
                       </span>
                     ) : column.key === 'date' ? (
@@ -61,4 +100,4 @@ const DataTable = ({ data, columns, handleEdit, handleDelete, getStatusBadgeClas
   );
 };
 
-export default DataTable
+export default DataTable;

@@ -6,7 +6,7 @@ import YukBuangContent from './pages/YukBuang/YukBuangContent';
 import Dashboard from './pages/Dashboard/Dashboard';
 import KuyPoint from './pages/KuyPoint/KuyPoint';
 import Users from './pages/Users/Users';
-import Profile from './pages/Profile/Profile';
+import Settings from './pages/Settings/Settings';
 
 
 const App = () => {
@@ -20,7 +20,7 @@ const App = () => {
           <Route path="/yuk-buang" element={<YukBuangContent />} />
           <Route path="/kuy-point" element={<KuyPoint />} />
           <Route path="/users" element={<Users />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </DashboardLayout>
     </Router>

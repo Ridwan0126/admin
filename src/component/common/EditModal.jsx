@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
-const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
+const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'default' }) => {
   const [formData, setFormData] = useState(data);
 
+  const getStatusOptions = () => {
+    if (contentType === 'users') {
+      return (
+        <>
+          <option value="Aktif">Aktif</option>
+          <option value="Nonaktif">Nonaktif</option>
+        </>
+      );
+    }
+    return (
+      <>
+        <option value="Berhasil">Berhasil</option>
+        <option value="Gagal">Gagal</option>
+        <option value="Proses">Proses</option>
+      </>
+    );
+  };
+
   if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onUpdate(formData);
-    onClose();
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const inputClasses = "w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
-  const labelClasses = "block text-sm font-medium text-gray-700";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -36,28 +37,42 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onUpdate(formData);
+          onClose();
+        }} className="p-4 space-y-4">
           {fields.map(field => (
             <div key={field.key} className="space-y-2">
-              <label className={labelClasses}>{field.label}</label>
+              <label className="block text-sm font-medium text-gray-700">
+                {field.label}
+              </label>
               {field.key === 'status' ? (
                 <select
                   name={field.key}
                   value={formData[field.key]}
-                  onChange={handleChange}
-                  className={inputClasses}
+                  onChange={(e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      [e.target.name]: e.target.value
+                    }));
+                  }}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="Berhasil">Berhasil</option>
-                  <option value="Gagal">Gagal</option>
-                  <option value="Proses">Proses</option>
+                  {getStatusOptions()}
                 </select>
               ) : (
                 <input
                   type="text"
                   name={field.key}
                   value={formData[field.key]}
-                  onChange={handleChange}
-                  className={inputClasses}
+                  onChange={(e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      [e.target.name]: e.target.value
+                    }));
+                  }}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               )}
             </div>
@@ -73,7 +88,7 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors duration-200"
+              className="px-4 py-2 text-sm font-medium text-white bg-customTeal rounded hover:bg-emerald-500 transition-colors duration-200"
             >
               Simpan
             </button>
@@ -83,5 +98,6 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
     </div>
   );
 };
+
 
 export default EditModal;

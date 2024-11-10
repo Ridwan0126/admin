@@ -23,7 +23,7 @@ const fullChartData = [
   { month: "Sep", desktop: 73 },
   { month: "Oct", desktop: 209 },
   { month: "Nov", desktop: 186 },
-  { month: "Dec", desktop: 305 },
+  { month: "Dec", desktop: 300 },
 ];
 
 const transactions = [
@@ -102,7 +102,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-base md:text-2xl font-bold">500.000</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Rupiah/Rp</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground">Kilogram (Kg)</p>
           </CardContent>
         </Card>
 
@@ -113,8 +113,8 @@ const Dashboard = () => {
             <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-base md:text-2xl font-bold">300.000</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Rupiah/Rp</p>
+            <div className="text-base md:text-2xl font-bold">250</div>
+            <p className="text-[10px] md:text-xs text-muted-foreground">Unit/Order</p>
           </CardContent>
         </Card>
 
@@ -125,8 +125,8 @@ const Dashboard = () => {
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-base md:text-2xl font-bold">400.000</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Rupiah/Rp</p>
+            <div className="text-base md:text-2xl font-bold">100</div>
+            <p className="text-[10px] md:text-xs text-muted-foreground">Unit/Order</p>
           </CardContent>
         </Card>
 
@@ -138,7 +138,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-base md:text-2xl font-bold">1,234</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Pengguna Aktif</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground">Users</p>
           </CardContent>
         </Card>
       </div>

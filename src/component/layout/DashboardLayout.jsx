@@ -21,8 +21,8 @@ const DashboardLayout = ({ children }) => {
         return 'Kuy Point';
       case '/users':
         return 'Users';
-      case '/profile':
-        return 'Profile';
+      case '/settings':
+        return 'Settings';
       default:
         return 'Dashboard';
     }
@@ -36,7 +36,7 @@ const DashboardLayout = ({ children }) => {
       'Yuk Buang': '/yuk-buang',
       'Kuy Point': '/kuy-point',
       'Users': '/users',
-      'Profile': '/profile'
+      'Settings': '/settings'
     };
 
     const path = pathMap[menuItem];

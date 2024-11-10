@@ -5,7 +5,8 @@ import {
   Truck, 
   TrendingUp, 
   Wallet, 
-  Users 
+  Users,
+  Settings 
 } from 'lucide-react';
 
 const Sidebar = ({ activeItem, setActiveItem }) => {
@@ -15,7 +16,7 @@ const Sidebar = ({ activeItem, setActiveItem }) => {
     { icon: TrendingUp, text: 'Yuk Buang' },
     { icon: Wallet, text: 'Kuy Point' },
     { icon: Users, text: 'Users' },
-    { icon: Users, text: 'Profile' }
+    { icon: Settings, text: 'Settings' }
   ];
 
 return (
