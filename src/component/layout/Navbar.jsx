@@ -43,7 +43,7 @@ const Navbar = ({ pageTitle }) => {
                                 <div className="text-xs text-gray-500">Admin</div>
                             </div>
                             <img
-                                src="/placeholder.svg"
+                                src="/Avatar.svg"
                                 alt="Profile"
                                 className="w-10 h-10 rounded-full"
                             />
