@@ -3,7 +3,8 @@ import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
 
-// Sample data
+
+// Sample data tetap sama
 const initialData = [
   {
     id: "YK-20241027-0001",
@@ -29,10 +30,56 @@ const initialData = [
   },
 ];
 
+// Komponen Search baru
+const SearchBar = ({ onSearch, searchFields }) => {
+  const [searchParams, setSearchParams] = useState({
+    searchText: '',
+    searchField: 'all'
+  });
+
+  const handleSearch = (e) => {
+    const { name, value } = e.target;
+    const newParams = { ...searchParams, [name]: value };
+    setSearchParams(newParams);
+    onSearch(newParams);
+  };
+
+  return (
+    <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="flex-1">
+        <input
+          type="text"
+          name="searchText"
+          placeholder="Cari data..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchParams.searchText}
+          onChange={handleSearch}
+        />
+      </div>
+      <div className="sm:w-48">
+        <select
+          name="searchField"
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchParams.searchField}
+          onChange={handleSearch}
+        >
+          <option value="all">Semua Field</option>
+          {searchFields.map(field => (
+            <option key={field.key} value={field.key}>
+              {field.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
 const YukAngkutContent = ({ searchQuery = '' }) => {
   const [data, setData] = useState(initialData);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [filteredData, setFilteredData] = useState(data);
 
   // Define columns configuration
   const columns = [
@@ -66,6 +113,25 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     }
   ];
 
+  const handleSearch = ({ searchText, searchField }) => {
+    if (!searchText) {
+      setFilteredData(data);
+      return;
+    }
+
+    const filtered = data.filter(item => {
+      if (searchField === 'all') {
+        return Object.values(item).some(value =>
+          value.toString().toLowerCase().includes(searchText.toLowerCase())
+        );
+      } else {
+        return item[searchField].toString().toLowerCase().includes(searchText.toLowerCase());
+      }
+    });
+
+    setFilteredData(filtered);
+  };
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Berhasil':
@@ -86,25 +152,26 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
 
   const handleDelete = (id) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      setData(prevData => prevData.filter(item => item.id !== id));
+      const newData = data.filter(item => item.id !== id);
+      setData(newData);
+      setFilteredData(newData);
     }
   };
 
   const handleUpdate = (updatedData) => {
-    setData(prevData =>
-      prevData.map(item =>
-        item.id === updatedData.id ? updatedData : item
-      )
+    const newData = data.map(item =>
+      item.id === updatedData.id ? updatedData : item
     );
+    setData(newData);
+    setFilteredData(newData);
     setIsEditModalOpen(false);
     setSelectedData(null);
   };
 
-  const filteredData = data.filter(item =>
-    Object.values(item).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  // Effect untuk inisialisasi filtered data
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
 
   return (
     <div>
@@ -113,6 +180,12 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
         <h2 className="text-xl font-semibold">Daftar Penjemputan Sampah</h2>
         <p className="text-sm text-gray-500">This is a list of latest Orders</p>
       </div>
+
+      {/* Search Component */}
+      <SearchBar 
+        onSearch={handleSearch}
+        searchFields={columns}
+      />
 
       {/* Desktop Table View */}
       <DataTable 

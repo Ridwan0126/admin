@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Recycle, Truck, ArrowDownUp, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -53,17 +53,63 @@ const transactions = [
   }
 ];
 
+// Search Bar Component
+const SearchBar = ({ onSearch, searchFields }) => {
+  const [searchParams, setSearchParams] = useState({
+    searchText: '',
+    searchField: 'all'
+  });
+
+  const handleSearch = (e) => {
+    const { name, value } = e.target;
+    const newParams = { ...searchParams, [name]: value };
+    setSearchParams(newParams);
+    onSearch(newParams);
+  };
+
+  return (
+    <div className="mb-4 flex flex-col sm:flex-row gap-3">
+      <div className="flex-1">
+        <input
+          type="text"
+          name="searchText"
+          placeholder="Cari transaksi..."
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchParams.searchText}
+          onChange={handleSearch}
+        />
+      </div>
+      <div className="sm:w-48">
+        <select
+          name="searchField"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchParams.searchField}
+          onChange={handleSearch}
+        >
+          <option value="all">Semua Field</option>
+          {searchFields.map(field => (
+            <option key={field.key} value={field.key}>
+              {field.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [windowWidth, setWindowWidth] = React.useState(
     typeof window !== 'undefined' ? window.innerWidth : 0
   );
   const [currentPage, setCurrentPage] = React.useState(0);
+  const [filteredTransactions, setFilteredTransactions] = useState(transactions);
   const ITEMS_PER_PAGE = 6;
 
   React.useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
-      setCurrentPage(0); // Reset to first page on resize
+      setCurrentPage(0);
     };
 
     window.addEventListener('resize', handleResize);
@@ -72,7 +118,6 @@ const Dashboard = () => {
 
   const isMobile = windowWidth < 768;
 
-  // Get current data slice for mobile
   const getCurrentData = () => {
     if (!isMobile) return fullChartData;
     
@@ -88,6 +133,33 @@ const Dashboard = () => {
 
   const handleNextPage = () => {
     setCurrentPage(prev => Math.min(totalPages - 1, prev + 1));
+  };
+
+  // Search fields configuration
+  const searchFields = [
+    { key: 'name', label: 'Nama' },
+    { key: 'email', label: 'Email' },
+    { key: 'type', label: 'Tipe Transaksi' },
+  ];
+
+  // Handle search
+  const handleSearch = ({ searchText, searchField }) => {
+    if (!searchText) {
+      setFilteredTransactions(transactions);
+      return;
+    }
+
+    const filtered = transactions.filter(item => {
+      if (searchField === 'all') {
+        return Object.values(item).some(value =>
+          value.toString().toLowerCase().includes(searchText.toLowerCase())
+        );
+      } else {
+        return item[searchField].toString().toLowerCase().includes(searchText.toLowerCase());
+      }
+    });
+
+    setFilteredTransactions(filtered);
   };
 
   return (
@@ -217,23 +289,35 @@ const Dashboard = () => {
             <CardTitle className="text-base md:text-xl">Transaksi Terbaru</CardTitle>
           </CardHeader>
           <CardContent className="p-4 md:p-6">
+            {/* Search Bar */}
+            <SearchBar 
+              onSearch={handleSearch}
+              searchFields={searchFields}
+            />
+            
             <div className="space-y-4">
-              {transactions.map((transaction, i) => (
-                <div key={i} className="flex items-center gap-3 pb-3 border-b last:border-0 last:pb-0">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={`/placeholder.svg?height=32&width=32`} alt="Avatar" />
-                    <AvatarFallback>{transaction.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{transaction.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{transaction.email}</p>
-                    <p className="text-xs text-muted-foreground">{transaction.type}</p>
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((transaction, i) => (
+                  <div key={i} className="flex items-center gap-3 pb-3 border-b last:border-0 last:pb-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={`/placeholder.svg?height=32&width=32`} alt="Avatar" />
+                      <AvatarFallback>{transaction.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{transaction.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{transaction.email}</p>
+                      <p className="text-xs text-muted-foreground">{transaction.type}</p>
+                    </div>
+                    <div className="text-sm font-medium">
+                      Rp {transaction.amount}
+                    </div>
                   </div>
-                  <div className="text-sm font-medium">
-                    Rp {transaction.amount}
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  Tidak ada transaksi yang ditemukan
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>

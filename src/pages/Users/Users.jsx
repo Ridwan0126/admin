@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
+import AddModal from './AddModal'; 
+import { PlusCircle } from 'lucide-react'; 
 
 // Sample data with unique IDs
 const initialData = [
@@ -46,6 +48,7 @@ const initialData = [
 const UsersContent = ({ searchQuery = '' }) => {
   const [data, setData] = useState(initialData);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   // Define columns configuration
@@ -84,6 +87,10 @@ const UsersContent = ({ searchQuery = '' }) => {
     }
   };
 
+  const handleAdd = (newUser) => {
+    setData(prevData => [...prevData, newUser]);
+  };
+
   const handleEdit = (rowData) => {
     setSelectedData(rowData);
     setIsEditModalOpen(true);
@@ -120,11 +127,24 @@ const UsersContent = ({ searchQuery = '' }) => {
     )
   );
 
+
+
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-xl font-semibold">Daftar Admin</h2>
-        <p className="text-sm text-gray-500">This is a list of latest Orders</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-semibold">Daftar Admin</h2>
+            <p className="text-sm text-gray-500">This is a list of latest Orders</p>
+          </div>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-customTeal text-white rounded-md hover:bg-emerald-500 transition-colors duration-200"
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span>Tambah</span>
+          </button>
+        </div>
       </div>
 
       <DataTable 
@@ -162,6 +182,12 @@ const UsersContent = ({ searchQuery = '' }) => {
           contentType='users'
         />
       )}
+
+      <AddModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAdd}
+      />
 
       {filteredData.length === 0 && (
         <div className="text-center py-8">

@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Search as SearchIcon, Mail, Bell } from 'lucide-react';
+import { useUser } from './UserContext';
 
 const Navbar = ({ pageTitle }) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const { userProfile } = useUser();
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
+
+    const fullName = `${userProfile.firstName} ${userProfile.lastName}`;
 
     return (
         <header className="bg-white shadow-sm sticky top-0 z-40">
@@ -39,13 +43,13 @@ const Navbar = ({ pageTitle }) => {
                         </button>
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <div className="text-sm font-medium">Ahmad Mulyono</div>
-                                <div className="text-xs text-gray-500">Admin</div>
+                                <div className="text-sm font-medium">{fullName}</div>
+                                <div className="text-xs text-gray-500">{userProfile.role}</div>
                             </div>
                             <img
-                                src="/placeholder.svg"
+                                src={userProfile.profileImage}
                                 alt="Profile"
-                                className="w-10 h-10 rounded-full"
+                                className="w-10 h-10 rounded-full object-cover"
                             />
                         </div>
                     </div>
@@ -56,13 +60,13 @@ const Navbar = ({ pageTitle }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <img
-                                src="/placeholder.svg"
+                                src={userProfile.profileImage}
                                 alt="Profile"
-                                className="w-10 h-10 rounded-full"
+                                className="w-10 h-10 rounded-full object-cover"
                             />
                             <div className="text-left hidden sm:block">
-                                <div className="text-sm font-medium">Ahmad Mulyono</div>
-                                <div className="text-xs text-gray-500">Admin</div>
+                                <div className="text-sm font-medium">{fullName}</div>
+                                <div className="text-xs text-gray-500">{userProfile.role}</div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">

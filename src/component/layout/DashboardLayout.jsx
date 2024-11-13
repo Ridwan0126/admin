@@ -53,7 +53,7 @@ const DashboardLayout = ({ children }) => {
         activeItem={activeItem} 
         setActiveItem={handleSetActiveItem}
       />
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="flex-1 overflow-auto">
         <Navbar 
           pageTitle={activeItem} 
           searchQuery={searchQuery}

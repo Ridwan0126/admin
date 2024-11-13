@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
+/**
+ * Komponen Modal untuk mengedit data
+ * @param {boolean} isOpen - Status apakah modal terbuka atau tidak
+ * @param {Function} onClose - Fungsi untuk menutup modal
+ * @param {Object} data - Data yang akan diedit
+ * @param {Array} fields - Field-field yang dapat diedit
+ * @param {Function} onUpdate - Fungsi untuk mengupdate data
+ * @param {string} contentType - Tipe konten untuk menentukan opsi status
+ */
 const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'default' }) => {
+  // State untuk menyimpan data formulir
   const [formData, setFormData] = useState(data);
 
+  // Fungsi untuk mendapatkan opsi status berdasarkan tipe konten
   const getStatusOptions = () => {
     if (contentType === 'users') {
       return (
@@ -22,11 +33,15 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
     );
   };
 
+  // Tidak menampilkan modal jika isOpen false
   if (!isOpen) return null;
 
   return (
+    // Overlay modal
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      {/* Konten modal */}
       <div className="bg-white rounded-lg w-full max-w-md">
+        {/* Header modal */}
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold">Edit Data</h2>
           <button 
@@ -37,6 +52,7 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
           </button>
         </div>
         
+        {/* Formulir edit */}
         <form onSubmit={(e) => {
           e.preventDefault();
           onUpdate(formData);
@@ -78,6 +94,7 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
             </div>
           ))}
 
+          {/* Tombol aksi */}
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
@@ -98,6 +115,5 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
     </div>
   );
 };
-
 
 export default EditModal;
