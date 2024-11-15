@@ -8,6 +8,7 @@ import KuyPoint from './pages/KuyPoint/KuyPoint';
 import Users from './pages/Users/Users';
 import Settings from './pages/Settings/Settings';
 import LoginPage from './pages/LoginPage/LoginPage';
+import Navbar from './component/layout/Navbar';
 
 const App = () => {
   return (
