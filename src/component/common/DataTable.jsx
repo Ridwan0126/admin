@@ -3,14 +3,16 @@ import { Edit2, Trash2 } from 'lucide-react';
 
 /**
  * Komponen DataTable untuk menampilkan data dalam bentuk tabel
- * @param {Array} data - Data yang akan ditampilkan dalam tabel
- * @param {Array} columns - Konfigurasi kolom tabel
- * @param {Function} handleEdit - Fungsi untuk menangani aksi edit
- * @param {Function} handleDelete - Fungsi untuk menangani aksi hapus
- * @param {string} contentType - Tipe konten untuk menentukan tampilan status
  */
-const DataTable = ({ data, columns, handleEdit, handleDelete, contentType = 'default' }) => {
-  // Fungsi untuk menentukan kelas CSS badge status
+const DataTable = ({ 
+  data, 
+  columns, 
+  handleEdit, 
+  handleDelete, 
+  contentType = 'default', 
+  onImageClick,
+  imageUrlMap 
+}) => {
   const getStatusBadgeClass = (status) => {
     if (contentType === 'users') {
       switch (status?.toLowerCase()) {
@@ -34,25 +36,62 @@ const DataTable = ({ data, columns, handleEdit, handleDelete, contentType = 'def
     }
   };
 
-  // Fungsi untuk menentukan kelas CSS badge peran
   const getRoleBadgeClass = (role) => {
     let baseClasses = 'rounded-full text-xs';
-
     if (role?.toLowerCase() === 'admin') {
-      baseClasses += ' bg-customTeal text-white';
-      baseClasses += ' sm:px-2 sm:py-1'; // Gaya untuk desktop
-      baseClasses += ' px-1 py-0.5'; // Gaya untuk mobile/tablet
+      baseClasses += ' bg-customTeal text-white sm:px-2 sm:py-1 px-1 py-0.5';
     }
-
     return baseClasses;
   };
 
+  const renderCell = (row, column) => {
+    switch (column.key) {
+      case 'photo':
+        return (
+          <div className="flex items-center space-x-2">
+            <img 
+              src={imageUrlMap?.[row[column.key]] || row[column.key]}
+              alt="Thumbnail" 
+              className="w-10 h-10 object-cover rounded cursor-pointer"
+              onClick={() => onImageClick?.(row[column.key])}
+            />
+            <button
+              onClick={() => onImageClick?.(row[column.key])}
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Lihat Foto
+            </button>
+          </div>
+        );
+      case 'status':
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(row[column.key])}`}>
+            {row[column.key]}
+          </span>
+        );
+      case 'role':
+        return (
+          <span className={getRoleBadgeClass(row[column.key])}>
+            {row[column.key]}
+          </span>
+        );
+      case 'date':
+        return (
+          <>
+            {row.date}
+            <br />
+            <span className="text-gray-500 text-xs">({row.time})</span>
+          </>
+        );
+      default:
+        return row[column.key];
+    }
+  };
+
   return (
-    // Kontainer tabel yang hanya ditampilkan pada layar besar
     <div className="hidden lg:block">
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full">
-          {/* Header tabel */}
           <thead>
             <tr className="border-b">
               {columns.map(column => (
@@ -63,29 +102,12 @@ const DataTable = ({ data, columns, handleEdit, handleDelete, contentType = 'def
               <th className="p-3 text-left text-sm font-semibold text-gray-600">Action</th>
             </tr>
           </thead>
-          {/* Isi tabel */}
           <tbody>
             {data.map((row) => (
               <tr key={row.id} className="border-b hover:bg-gray-50">
                 {columns.map(column => (
                   <td key={`${row.id}-${column.key}`} className="p-3">
-                    {column.key === 'status' ? (
-                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(row[column.key])}`}>
-                        {row[column.key]}
-                      </span>
-                    ) : column.key === 'role' ? (
-                      <span className={getRoleBadgeClass(row[column.key])}>
-                        {row[column.key]}
-                      </span>
-                    ) : column.key === 'date' ? (
-                      <>
-                        {row.date}
-                        <br />
-                        <span className="text-gray-500 text-xs">({row.time})</span>
-                      </>
-                    ) : (
-                      row[column.key]
-                    )}
+                    {renderCell(row, column)}
                   </td>
                 ))}
                 <td className="p-3">

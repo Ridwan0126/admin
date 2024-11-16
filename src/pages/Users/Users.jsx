@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
-import AddModal from './AddModal'; 
-import { PlusCircle } from 'lucide-react'; 
+import AddModal from './AddModal';
+import { PlusCircle } from 'lucide-react';
 
 // Sample data with unique IDs
 const initialData = [
   {
-    id: '1',  // Menambahkan ID unik
+    id: '1',
     name: "Agus Santoso sip",
     email: "agussantos@gmail.com",
     number: "085312345678",
@@ -17,7 +17,7 @@ const initialData = [
     status: "Aktif",
   },
   {
-    id: '2',  // Menambahkan ID unik
+    id: '2',
     name: "Agus Santoso",
     email: "agussantos@gmail.com",
     number: "085312345678",
@@ -26,7 +26,7 @@ const initialData = [
     status: "Aktif",
   },
   {
-    id: '3',  // Menambahkan ID unik
+    id: '3',
     name: "ahmad Agus Santoso",
     email: "agussantos@gmail.com",
     number: "085312345678",
@@ -35,7 +35,7 @@ const initialData = [
     status: "Aktif",
   },
   {
-    id: '4',  // Menambahkan ID unik
+    id: '4',
     name: "kepin yoga",
     email: "kepin@gmail.com",
     number: "085312345678",
@@ -45,13 +45,74 @@ const initialData = [
   },
 ];
 
-const UsersContent = ({ searchQuery = '' }) => {
+// SearchBar Component
+const SearchBar = ({ data, onSearch }) => {
+  const [searchText, setSearchText] = useState('');
+  const [searchField, setSearchField] = useState('all');
+
+  const performSearch = (text, field) => {
+    const searchTerm = text.toLowerCase().trim();
+    
+    return data.filter(item => {
+      if (field === 'all') {
+        return Object.values(item).some(value => 
+          value.toString().toLowerCase().includes(searchTerm)
+        );
+      } else {
+        const itemValue = item[field].toString().toLowerCase();
+        return itemValue.includes(searchTerm);
+      }
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const newSearchText = e.target.value;
+    setSearchText(newSearchText);
+    const results = performSearch(newSearchText, searchField);
+    onSearch(results);
+  };
+
+  const handleFieldChange = (e) => {
+    const newSearchField = e.target.value;
+    setSearchField(newSearchField);
+    const results = performSearch(searchText, newSearchField);
+    onSearch(results);
+  };
+
+  return (
+    <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="flex-1">
+        <input
+          type="text"
+          placeholder="Cari data..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchText}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className="sm:w-48">
+        <select
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchField}
+          onChange={handleFieldChange}
+        >
+          <option value="all">Semua Field</option>
+          {Object.keys(initialData[0]).map(key => (
+            <option key={key} value={key}>{key}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
+const UsersContent = () => {
   const [data, setData] = useState(initialData);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [filteredData, setFilteredData] = useState(data);
 
-  // Define columns configuration
   const columns = [
     { key: 'name', label: 'Nama' },
     { key: 'email', label: 'Email' },
@@ -74,6 +135,10 @@ const UsersContent = ({ searchQuery = '' }) => {
     }
   ];
 
+  const handleSearch = (searchResults) => {
+    setFilteredData(searchResults);
+  };
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Berhasil':
@@ -88,7 +153,9 @@ const UsersContent = ({ searchQuery = '' }) => {
   };
 
   const handleAdd = (newUser) => {
-    setData(prevData => [...prevData, newUser]);
+    const updatedData = [...data, newUser];
+    setData(updatedData);
+    setFilteredData(updatedData);
   };
 
   const handleEdit = (rowData) => {
@@ -98,36 +165,32 @@ const UsersContent = ({ searchQuery = '' }) => {
 
   const handleDelete = (id) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      setData(prevData => prevData.filter(item => item.id !== id));
+      const newData = data.filter(item => item.id !== id);
+      setData(newData);
+      setFilteredData(newData);
     }
   };
 
-  // Perbaikan fungsi handleUpdate
   const handleUpdate = (updatedData) => {
-    setData(prevData => {
-      return prevData.map(item => {
-        // Hanya update data dengan ID yang sesuai
-        if (item.id === selectedData.id) {
-          return {
-            ...item,
-            ...updatedData
-          };
-        }
-        return item;
-      });
+    const newData = data.map(item => {
+      if (item.id === selectedData.id) {
+        return {
+          ...item,
+          ...updatedData
+        };
+      }
+      return item;
     });
     
+    setData(newData);
+    setFilteredData(newData);
     setIsEditModalOpen(false);
     setSelectedData(null);
   };
 
-  const filteredData = data.filter(item =>
-    Object.values(item).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
-
-
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
 
   return (
     <div>
@@ -146,6 +209,11 @@ const UsersContent = ({ searchQuery = '' }) => {
           </button>
         </div>
       </div>
+
+      <SearchBar
+        data={data}
+        onSearch={handleSearch}
+      />
 
       <DataTable 
         data={filteredData}

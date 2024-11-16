@@ -2,123 +2,110 @@ import React, { useState, useEffect } from 'react';
 import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
+import { X } from 'lucide-react';
 
+// Dummy image URLs dengan placeholder yang valid
+const dummyImages = {
+  'sampah4.jpg': 'https://picsum.photos/400/300?random=4',
+  'sampah5.jpg': 'https://picsum.photos/400/300?random=5',
+  'sampah6.jpg': 'https://picsum.photos/400/300?random=6'
+};
 
-// Sample data tetap sama
+const ImagePreviewModal = ({ isOpen, onClose, imageUrl }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="relative bg-white rounded-lg max-w-3xl max-h-[90vh] overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute right-2 top-2 p-1 rounded-full bg-white shadow-lg hover:bg-gray-100"
+        >
+          <X className="h-6 w-6" />
+        </button>
+        <img
+          src={dummyImages[imageUrl] || imageUrl}
+          alt="Preview"
+          className="max-h-[85vh] w-auto object-contain"
+        />
+      </div>
+    </div>
+  );
+};
+
 const initialData = [
   {
-    id: "YK-20241027-0001",
+    id: "YP-20241027-0001",
     name: "Agus Santoso",
     location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
     date: "Oct 27, 2024",
     time: "08:00",
-    status: "Berhasil",
+    type: "Alumunium",
+    amount: "30 Kg",
+    photo: "sampah4.jpg",
+    status: "Berhasil"
   },
   {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
+    id: "YP-20241027-0002",
+    name: "Kepin Santoso",
     location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
     date: "Oct 27, 2024",
     time: "08:00",
-    status: "Berhasil",
+    type: "Alumunium",
+    amount: "30 Kg",
+    photo: "sampah5.jpg",
+    status: "Berhasil"
   },
   {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
+    id: "YP-20241027-0002",
+    name: "ega Santoso",
     location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
     date: "Oct 27, 2024",
     time: "08:00",
-    status: "Berhasil",
-  },
-  {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
     type: "Alumunium",
     amount: "30 Kg",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    status: "Berhasil",
-  },
-  {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    status: "Berhasil",
-  },
-  {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    status: "Berhasil",
-  },
-  {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    status: "Berhasil",
-  },
-  {
-    id: "YK-20241027-0001",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    status: "Berhasil",
-  },
-  {
-    id: "YK-20241027-0002",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    driver: "Fauzi Witowo",
-    type: "Alumunium",
-    amount: "30 Kg",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    status: "Berhasil",
+    photo: "sampah6.jpg",
+    status: "Berhasil"
   },
 ];
 
-// Komponen Search baru
-const SearchBar = ({ onSearch, searchFields }) => {
-  const [searchParams, setSearchParams] = useState({
-    searchText: '',
-    searchField: 'all'
-  });
+const SearchBar = ({ data, onSearch }) => {
+  const [searchText, setSearchText] = useState('');
+  const [searchField, setSearchField] = useState('all');
 
-  const handleSearch = (e) => {
-    const { name, value } = e.target;
-    const newParams = { ...searchParams, [name]: value };
-    setSearchParams(newParams);
-    onSearch(newParams);
+  const performSearch = (text, field) => {
+    const searchTerm = text.toLowerCase().trim();
+    
+    return data.filter(item => {
+      if (field === 'all') {
+        return Object.entries(item).some(([key, val]) => 
+          key !== 'photo' && val.toString().toLowerCase().includes(searchTerm)
+        );
+      } else {
+        const itemValue = item[field].toString().toLowerCase();
+        return itemValue.includes(searchTerm);
+      }
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const newSearchText = e.target.value;
+    setSearchText(newSearchText);
+    const results = performSearch(newSearchText, searchField);
+    onSearch(results);
+  };
+
+  const handleFieldChange = (e) => {
+    const newSearchField = e.target.value;
+    setSearchField(newSearchField);
+    const results = performSearch(searchText, newSearchField);
+    onSearch(results);
   };
 
   return (
@@ -126,58 +113,74 @@ const SearchBar = ({ onSearch, searchFields }) => {
       <div className="flex-1">
         <input
           type="text"
-          name="searchText"
           placeholder="Cari data..."
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchParams.searchText}
-          onChange={handleSearch}
+          value={searchText}
+          onChange={handleInputChange}
         />
       </div>
       <div className="sm:w-48">
         <select
-          name="searchField"
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchParams.searchField}
-          onChange={handleSearch}
+          value={searchField}
+          onChange={handleFieldChange}
         >
           <option value="all">Semua Field</option>
-          {searchFields.map(field => (
-            <option key={field.key} value={field.key}>
-              {field.label}
-            </option>
-          ))}
+          {Object.keys(initialData[0])
+            .filter(key => key !== 'photo')
+            .map(key => (
+              <option key={key} value={key}>{key}</option>
+            ))}
         </select>
       </div>
     </div>
   );
 };
 
-const YukAngkutContent = ({ searchQuery = '' }) => {
+const YukBuangContent = () => {
   const [data, setData] = useState(initialData);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [filteredData, setFilteredData] = useState(data);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  // Define columns configuration
   const columns = [
     { key: 'id', label: 'Pickup ID' },
     { key: 'name', label: 'Nama' },
     { key: 'location', label: 'Lokasi' },
-    { key: 'driver', label: 'Driver' },
+    { key: 'date', label: 'Tanggal & Jam' },
     { key: 'type', label: 'Jenis' },
     { key: 'amount', label: 'Jumlah(Kg)' },
-    { key: 'date', label: 'Tanggal & Jam' },
+    { 
+      key: 'photo', 
+      label: 'Foto',
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <img 
+            src={dummyImages[value]}
+            alt="Thumbnail" 
+            className="w-10 h-10 object-cover rounded cursor-pointer"
+            onClick={() => handleImageClick(value)}
+          />
+          <button
+            onClick={() => handleImageClick(value)}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            Lihat Foto
+          </button>
+        </div>
+      )
+    },
     { key: 'status', label: 'Status' }
   ];
 
-  // Define card sections for mobile view
   const cardSections = [
     {
       title: 'Personal Info',
       fields: [
         { key: 'name', label: 'Nama' },
-        { key: 'location', label: 'Lokasi' },
-        { key: 'driver', label: 'Driver' }
+        { key: 'location', label: 'Lokasi' }
       ]
     },
     {
@@ -185,28 +188,38 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
       fields: [
         { key: 'type', label: 'Jenis' },
         { key: 'amount', label: 'Jumlah' },
-        { key: 'date', label: 'Waktu' }
+        { key: 'date', label: 'Waktu' },
+        { 
+          key: 'photo', 
+          label: 'Foto',
+          render: (value) => (
+            <div className="flex items-center space-x-2">
+              <img 
+                src={dummyImages[value]}
+                alt="Thumbnail" 
+                className="w-10 h-10 object-cover rounded cursor-pointer"
+                onClick={() => handleImageClick(value)}
+              />
+              <button
+                onClick={() => handleImageClick(value)}
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Lihat Foto
+              </button>
+            </div>
+          )
+        }
       ]
     }
   ];
 
-  const handleSearch = ({ searchText, searchField }) => {
-    if (!searchText) {
-      setFilteredData(data);
-      return;
-    }
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setIsImageModalOpen(true);
+  };
 
-    const filtered = data.filter(item => {
-      if (searchField === 'all') {
-        return Object.values(item).some(value =>
-          value.toString().toLowerCase().includes(searchText.toLowerCase())
-        );
-      } else {
-        return item[searchField].toString().toLowerCase().includes(searchText.toLowerCase());
-      }
-    });
-
-    setFilteredData(filtered);
+  const handleSearch = (searchResults) => {
+    setFilteredData(searchResults);
   };
 
   const getStatusBadgeClass = (status) => {
@@ -227,9 +240,9 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (row) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = data.filter(item => item.id !== id);
+      const newData = data.filter(item => item.id !== row.id);
       setData(newData);
       setFilteredData(newData);
     }
@@ -245,48 +258,46 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     setSelectedData(null);
   };
 
-  // Effect untuk inisialisasi filtered data
   useEffect(() => {
     setFilteredData(data);
   }, [data]);
 
   return (
     <div>
-      {/* Page Header */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold">Daftar Penjemputan Sampah</h2>
         <p className="text-sm text-gray-500">This is a list of latest Orders</p>
       </div>
 
-      {/* Search Component */}
-      <SearchBar 
+      <SearchBar
+        data={data}
         onSearch={handleSearch}
-        searchFields={columns}
       />
 
-      {/* Desktop Table View */}
-      <DataTable 
+      <DataTable
         data={filteredData}
         columns={columns}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         getStatusBadgeClass={getStatusBadgeClass}
+        onImageClick={handleImageClick}
+        imageUrlMap={dummyImages}
       />
 
-      {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {filteredData.map((row) => (
-          <DataCard 
+          <DataCard
             key={row.id}
             data={row}
             sections={cardSections}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
+            onImageClick={handleImageClick}
+            imageUrlMap={dummyImages}
           />
         ))}
       </div>
 
-      {/* Edit Modal */}
       {selectedData && (
         <EditModal
           isOpen={isEditModalOpen}
@@ -300,7 +311,12 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
         />
       )}
 
-      {/* No Results Message */}
+      <ImagePreviewModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageUrl={selectedImage}
+      />
+
       {filteredData.length === 0 && (
         <div className="text-center py-8">
           <p className="text-gray-500">Tidak ada data yang ditemukan</p>
@@ -310,4 +326,4 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
   );
 };
 
-export default YukAngkutContent;
+export default YukBuangContent;

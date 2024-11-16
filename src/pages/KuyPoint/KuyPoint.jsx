@@ -3,7 +3,6 @@ import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
 
-// Sample data
 const initialData = [
   {
     id: "KP-20241027-0001",
@@ -25,12 +24,75 @@ const initialData = [
   },
 ];
 
-const YukAngkutContent = ({ searchQuery = '' }) => {
+const SearchBar = ({ data, onSearch }) => {
+  const [searchText, setSearchText] = useState('');
+  const [searchField, setSearchField] = useState('all');
+
+  // Improved search function with better matching
+  const performSearch = (text, field) => {
+    const searchTerm = text.toLowerCase().trim();
+    
+    return data.filter(item => {
+      if (field === 'all') {
+        return Object.values(item).some(value => 
+          value.toString().toLowerCase().includes(searchTerm)
+        );
+      } else {
+        const itemValue = item[field].toString().toLowerCase();
+        return itemValue.includes(searchTerm);
+      }
+    });
+  };
+
+  // Handle text input changes
+  const handleInputChange = (e) => {
+    const newSearchText = e.target.value;
+    setSearchText(newSearchText);
+    const results = performSearch(newSearchText, searchField);
+    onSearch(results);
+  };
+
+  // Handle field selection changes
+  const handleFieldChange = (e) => {
+    const newSearchField = e.target.value;
+    setSearchField(newSearchField);
+    const results = performSearch(searchText, newSearchField);
+    onSearch(results);
+  };
+
+  return (
+    <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="flex-1">
+        <input
+          type="text"
+          placeholder="Cari data..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchText}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className="sm:w-48">
+        <select
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchField}
+          onChange={handleFieldChange}
+        >
+          <option value="all">Semua Field</option>
+          {Object.keys(initialData[0]).map(key => (
+            <option key={key} value={key}>{key}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
+const KuyPointContent = ({ searchQuery = '' }) => {
   const [data, setData] = useState(initialData);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [filteredData, setFilteredData] = useState(data);
 
-  // Define columns configuration
   const columns = [
     { key: 'id', label: 'ID Penukaran' },
     { key: 'name', label: 'Nama' },
@@ -41,7 +103,6 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     { key: 'status', label: 'Status' }
   ];
 
-  // Define card sections for mobile view
   const cardSections = [
     {
       title: 'Personal Info',
@@ -61,6 +122,10 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     }
   ];
 
+  const handleSearch = (searchResults) => {
+    setFilteredData(searchResults);
+  };
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Berhasil':
@@ -79,38 +144,41 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (row) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      setData(prevData => prevData.filter(item => item.id !== id));
+      const newData = data.filter(item => item.id !== row.id);
+      setData(newData);
+      setFilteredData(newData);
     }
   };
 
   const handleUpdate = (updatedData) => {
-    setData(prevData =>
-      prevData.map(item =>
-        item.id === updatedData.id ? updatedData : item
-      )
+    const newData = data.map(item =>
+      item.id === updatedData.id ? updatedData : item
     );
+    setData(newData);
+    setFilteredData(newData);
     setIsEditModalOpen(false);
     setSelectedData(null);
   };
 
-  const filteredData = data.filter(item =>
-    Object.values(item).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
 
   return (
     <div>
-      {/* Page Header */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold">Riwayat Penukaran Poin</h2>
         <p className="text-sm text-gray-500">This is a list of latest Orders</p>
       </div>
 
-      {/* Desktop Table View */}
-      <DataTable 
+      <SearchBar
+        data={data}
+        onSearch={handleSearch}
+      />
+
+      <DataTable
         data={filteredData}
         columns={columns}
         handleEdit={handleEdit}
@@ -118,10 +186,9 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
         getStatusBadgeClass={getStatusBadgeClass}
       />
 
-      {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {filteredData.map((row) => (
-          <DataCard 
+          <DataCard
             key={row.id}
             data={row}
             sections={cardSections}
@@ -131,7 +198,6 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
         ))}
       </div>
 
-      {/* Edit Modal */}
       {selectedData && (
         <EditModal
           isOpen={isEditModalOpen}
@@ -155,4 +221,4 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
   );
 };
 
-export default YukAngkutContent;
+export default KuyPointContent;
