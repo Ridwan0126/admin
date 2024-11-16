@@ -40,7 +40,7 @@ const Navbar = ({ pageTitle }) => {
 
                     <div className="flex items-center gap-4">
                         {/* Search Icon */}
-                        <div className="relative w-64">
+                        {/* <div className="relative w-64">
                             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 className="pl-10 w-full px-3 py-2 border rounded"
@@ -50,7 +50,7 @@ const Navbar = ({ pageTitle }) => {
                                 onChange={handleSearchChange}
                                 aria-label="Search"
                             />
-                        </div>
+                        </div> */}
 
                         {/* Messages Popover */}
                         <Popover>
@@ -212,7 +212,7 @@ const Navbar = ({ pageTitle }) => {
                     </div>
                     
                     {/* Search Icon for Mobile */}
-                    <div className="relative w-full">
+                    {/* <div className="relative w-full">
                         <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             className="pl-10 w-full px-3 py-2 border rounded"
@@ -222,7 +222,7 @@ const Navbar = ({ pageTitle }) => {
                             onChange={handleSearchChange}
                             aria-label="Search"
                         />
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </header>

@@ -253,9 +253,10 @@ const YukAngkutContent = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (row) => {
+  // Perbaikan fungsi handleDelete
+  const handleDelete = (id) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = data.filter(item => item.id !== row.id);
+      const newData = data.filter(item => item.id !== id);
       setData(newData);
       setFilteredData(newData);
     }
@@ -291,7 +292,8 @@ const YukAngkutContent = () => {
         handleDelete={handleDelete}
         getStatusBadgeClass={getStatusBadgeClass}
         onImageClick={handleImageClick}
-        imageUrlMap={dummyImages}  // Menambahkan prop imageUrlMap
+        imageUrlMap={dummyImages}
+        contentType="yukangkut"
       />
 
       <div className="lg:hidden space-y-4">
@@ -303,7 +305,8 @@ const YukAngkutContent = () => {
             handleEdit={handleEdit}
             handleDelete={handleDelete}
             onImageClick={handleImageClick}
-            imageUrlMap={dummyImages}  // Menambahkan prop imageUrlMap
+            imageUrlMap={dummyImages}
+            contentType="yukangkut"
           />
         ))}
       </div>
@@ -318,6 +321,7 @@ const YukAngkutContent = () => {
           data={selectedData}
           fields={columns.filter(col => col.key !== 'id')}
           onUpdate={handleUpdate}
+          contentType="yukangkut"
         />
       )}
 

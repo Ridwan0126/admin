@@ -1,15 +1,8 @@
 import React from 'react';
 import LogoPilah from '../../assets/LogoPilah.svg';
-import { 
-  LayoutDashboard, 
-  Truck, 
-  TrendingUp, 
-  Wallet, 
-  Users,
-  Settings 
-} from 'lucide-react';
+import { LayoutDashboard, Truck, TrendingUp, Wallet, Users, Settings, LogOut } from 'lucide-react';
 
-const Sidebar = ({ activeItem, setActiveItem }) => {
+const Sidebar = ({ activeItem, setActiveItem, onLogout }) => {
   const sidebarItems = [
     { icon: LayoutDashboard, text: 'Dashboard' },
     { icon: Truck, text: 'Yuk Angkut' },
@@ -42,6 +35,15 @@ const Sidebar = ({ activeItem, setActiveItem }) => {
                 <span className="hidden lg:inline">{text}</span>
               </button>
             ))}
+            
+            {/* Logout Button */}
+            <button
+              onClick={onLogout}
+              className="flex items-center justify-center lg:justify-start lg:gap-3 p-2 lg:px-4 lg:py-2 text-sm rounded-3xl lg:rounded-xl transition-colors duration-200 min-w-[3rem] md:min-w-[3.5rem] lg:min-w-0 lg:w-full text-white lg:text-red-600 hover:bg-white/10 lg:hover:bg-red-50"
+            >
+              <LogOut className="w-6 h-6 lg:w-5 lg:h-5 text-white lg:text-red-600" />
+              <span className="hidden lg:inline">Logout</span>
+            </button>
           </div>
         </nav>
       </aside>

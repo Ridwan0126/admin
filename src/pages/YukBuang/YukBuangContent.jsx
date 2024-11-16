@@ -63,8 +63,8 @@ const initialData = [
     status: "Berhasil"
   },
   {
-    id: "YP-20241027-0002",
-    name: "ega Santoso",
+    id: "YP-20241027-0003",
+    name: "Ega Santoso",
     location: "Jl Melati No. 12 Komplek",
     date: "Oct 27, 2024",
     time: "08:00",
@@ -75,37 +75,27 @@ const initialData = [
   },
 ];
 
-const SearchBar = ({ data, onSearch }) => {
+const SearchBar = ({ onSearch }) => {
   const [searchText, setSearchText] = useState('');
   const [searchField, setSearchField] = useState('all');
 
-  const performSearch = (text, field) => {
-    const searchTerm = text.toLowerCase().trim();
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
     
-    return data.filter(item => {
-      if (field === 'all') {
+    const searchTerm = value.toLowerCase().trim();
+    
+    const filtered = initialData.filter(item => {
+      if (searchField === 'all') {
         return Object.entries(item).some(([key, val]) => 
           key !== 'photo' && val.toString().toLowerCase().includes(searchTerm)
         );
       } else {
-        const itemValue = item[field].toString().toLowerCase();
-        return itemValue.includes(searchTerm);
+        return item[searchField].toString().toLowerCase().includes(searchTerm);
       }
     });
-  };
-
-  const handleInputChange = (e) => {
-    const newSearchText = e.target.value;
-    setSearchText(newSearchText);
-    const results = performSearch(newSearchText, searchField);
-    onSearch(results);
-  };
-
-  const handleFieldChange = (e) => {
-    const newSearchField = e.target.value;
-    setSearchField(newSearchField);
-    const results = performSearch(searchText, newSearchField);
-    onSearch(results);
+    
+    onSearch(filtered);
   };
 
   return (
@@ -116,14 +106,29 @@ const SearchBar = ({ data, onSearch }) => {
           placeholder="Cari data..."
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={searchText}
-          onChange={handleInputChange}
+          onChange={handleSearch}
         />
       </div>
       <div className="sm:w-48">
         <select
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={searchField}
-          onChange={handleFieldChange}
+          onChange={(e) => {
+            setSearchField(e.target.value);
+            // Trigger search with new field
+            const value = searchText;
+            const searchTerm = value.toLowerCase().trim();
+            const filtered = initialData.filter(item => {
+              if (e.target.value === 'all') {
+                return Object.entries(item).some(([key, val]) => 
+                  key !== 'photo' && val.toString().toLowerCase().includes(searchTerm)
+                );
+              } else {
+                return item[e.target.value].toString().toLowerCase().includes(searchTerm);
+              }
+            });
+            onSearch(filtered);
+          }}
         >
           <option value="all">Semua Field</option>
           {Object.keys(initialData[0])
@@ -240,9 +245,9 @@ const YukBuangContent = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (row) => {
+  const handleDelete = (id) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = data.filter(item => item.id !== row.id);
+      const newData = data.filter(item => item.id !== id);
       setData(newData);
       setFilteredData(newData);
     }
@@ -269,10 +274,7 @@ const YukBuangContent = () => {
         <p className="text-sm text-gray-500">This is a list of latest Orders</p>
       </div>
 
-      <SearchBar
-        data={data}
-        onSearch={handleSearch}
-      />
+      <SearchBar onSearch={handleSearch} />
 
       <DataTable
         data={filteredData}
@@ -291,7 +293,7 @@ const YukBuangContent = () => {
             data={row}
             sections={cardSections}
             handleEdit={handleEdit}
-            handleDelete={handleDelete}
+            handleDelete={() => handleDelete(row.id)}
             onImageClick={handleImageClick}
             imageUrlMap={dummyImages}
           />
