@@ -82,15 +82,15 @@ const Settings = () => {
     updateUserProfile({ ...userProfile, profileImage: defaultImage });
   };
 
-  // Render function for EditDialog
   const renderEditDialog = () => (
     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md mx-auto w-[95%] p-4 sm:p-6 h-[80vh] overflow-y-auto">
+        <DialogHeader className="mb-4">
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleEditSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleEditSubmit} className="space-y-4 pb-20">
+          {/* First Name & Last Name */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -109,6 +109,7 @@ const Settings = () => {
             </div>
           </div>
           
+          {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -119,6 +120,7 @@ const Settings = () => {
             />
           </div>
 
+          {/* Phone */}
           <div className="space-y-2">
             <Label htmlFor="phone">Phone number</Label>
             <Input
@@ -129,10 +131,11 @@ const Settings = () => {
             />
           </div>
 
+          {/* Gender */}
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
             <Select name="gender" defaultValue={profileData.gender}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -142,6 +145,7 @@ const Settings = () => {
             </Select>
           </div>
 
+          {/* Role */}
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
             <Input
@@ -151,6 +155,7 @@ const Settings = () => {
             />
           </div>
 
+          {/* Address */}
           <div className="space-y-2">
             <Label htmlFor="address">Address</Label>
             <textarea
@@ -158,19 +163,21 @@ const Settings = () => {
               name="address"
               defaultValue={profileData.address}
               rows={3}
-              className="w-full border rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full min-h-[80px] border rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div className="flex gap-4 justify-end">
+          {/* Action Buttons */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t flex gap-2 sm:relative sm:border-0 sm:justify-end sm:bg-transparent sm:p-0">
             <Button
               type="button"
               variant="destructive"
               onClick={() => setIsEditDialogOpen(false)}
+              className="flex-1 sm:flex-none"
             >
               Batal
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="flex-1 sm:flex-none">
               Simpan
             </Button>
           </div>
@@ -183,24 +190,27 @@ const Settings = () => {
     <>
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            {/* Profile Section */}
+            <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold">Profile picture</h2>
               <Button 
-                className="mr-2 bg-[#4182F9] hover:bg-[#3671e0] text-white"
+                className="bg-[#4182F9] hover:bg-[#3671e0] text-white w-auto"
                 onClick={() => setIsEditDialogOpen(true)}
               >
                 Edit
               </Button>
             </div>
-            <div className="flex items-center space-x-4 mb-6">
+
+            {/* Avatar and Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
               <Avatar className="w-24 h-24">
                 <AvatarImage src={profileData.profileImage} alt="Profile picture" />
                 <AvatarFallback>
                   {profileData.firstName?.[0] || ''}{profileData.lastName?.[0] || ''}
                 </AvatarFallback>
               </Avatar>
-              <div>
+              <div className="flex flex-row gap-2">
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -210,7 +220,7 @@ const Settings = () => {
                 />
                 <Button
                   variant="outline"
-                  className="mr-2 bg-[#55B3A4] text-[#ffffff] border-[#55B3A4] hover:bg-[#55B3A4]/10"
+                  className="bg-[#55B3A4] text-white border-[#55B3A4] hover:bg-[#55B3A4]/10"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Change picture
@@ -224,7 +234,9 @@ const Settings = () => {
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Profile Info Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   First name

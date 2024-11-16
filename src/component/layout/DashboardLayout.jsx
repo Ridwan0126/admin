@@ -80,6 +80,7 @@ const DashboardLayout = ({ children }) => {
           pageTitle={activeItem} 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onLogout={handleLogout} 
         />
         <div className="p-4 sm:p-6">
           {React.cloneElement(children, { searchQuery })}

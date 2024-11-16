@@ -53,7 +53,6 @@ const transactions = [
   }
 ];
 
-// Search Bar Component
 const SearchBar = ({ onSearch, searchFields }) => {
   const [searchParams, setSearchParams] = useState({
     searchText: '',
@@ -135,14 +134,12 @@ const Dashboard = () => {
     setCurrentPage(prev => Math.min(totalPages - 1, prev + 1));
   };
 
-  // Search fields configuration
   const searchFields = [
     { key: 'name', label: 'Nama' },
     { key: 'email', label: 'Email' },
     { key: 'type', label: 'Tipe Transaksi' },
   ];
 
-  // Handle search
   const handleSearch = ({ searchText, searchField }) => {
     if (!searchText) {
       setFilteredTransactions(transactions);
@@ -164,53 +161,53 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Status Cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+      {/* Status Cards - Updated grid styling */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Card Total Daur Ulang */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-            <CardTitle className="text-xs md:text-sm font-medium">Total Daur Ulang</CardTitle>
+            <CardTitle className="text-sm md:text-sm font-medium">Total Daur Ulang</CardTitle>
             <Recycle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-base md:text-2xl font-bold">500.000</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Kilogram (Kg)</p>
+            <div className="text-2xl md:text-2xl font-bold">500.000</div>
+            <p className="text-xs md:text-xs text-muted-foreground">Kilogram (Kg)</p>
           </CardContent>
         </Card>
 
         {/* Card Total Penjemputan */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-            <CardTitle className="text-xs md:text-sm font-medium">Total Penjemputan</CardTitle>
+            <CardTitle className="text-sm md:text-sm font-medium">Total Penjemputan</CardTitle>
             <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-base md:text-2xl font-bold">250</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Unit/Order</p>
+            <div className="text-2xl md:text-2xl font-bold">250</div>
+            <p className="text-xs md:text-xs text-muted-foreground">Unit/Order</p>
           </CardContent>
         </Card>
 
         {/* Card Total Pengantaran */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-            <CardTitle className="text-xs md:text-sm font-medium">Total Pengantaran</CardTitle>
+            <CardTitle className="text-sm md:text-sm font-medium">Total Pengantaran</CardTitle>
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-base md:text-2xl font-bold">100</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Unit/Order</p>
+            <div className="text-2xl md:text-2xl font-bold">100</div>
+            <p className="text-xs md:text-xs text-muted-foreground">Unit/Order</p>
           </CardContent>
         </Card>
 
         {/* Card Total Pengguna */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-            <CardTitle className="text-xs md:text-sm font-medium">Total Pengguna</CardTitle>
+            <CardTitle className="text-sm md:text-sm font-medium">Total Pengguna</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="text-base md:text-2xl font-bold">1,234</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground">Users</p>
+            <div className="text-2xl md:text-2xl font-bold">1,234</div>
+            <p className="text-xs md:text-xs text-muted-foreground">Users</p>
           </CardContent>
         </Card>
       </div>

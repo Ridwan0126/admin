@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SearchIcon, Mail, Bell } from 'lucide-react';
+import { SearchIcon, Mail, Bell, LogOut } from 'lucide-react';
 import { useUser } from './UserContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ const notifications = [
   { id: 3, title: "Pengingat", description: "Jadwal penjemputan sampah untuk hari ini", time: "1h yang lalu" }
 ];
 
-const Navbar = ({ pageTitle }) => {
+const Navbar = ({ pageTitle, onLogout }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const { userProfile } = useUser();
 
@@ -39,19 +39,6 @@ const Navbar = ({ pageTitle }) => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Search Icon */}
-                        {/* <div className="relative w-64">
-                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input
-                                className="pl-10 w-full px-3 py-2 border rounded"
-                                placeholder="Search..."
-                                type="search"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                aria-label="Search"
-                            />
-                        </div> */}
-
                         {/* Messages Popover */}
                         <Popover>
                             <PopoverTrigger asChild>
@@ -208,21 +195,18 @@ const Navbar = ({ pageTitle }) => {
                                     </Card>
                                 </PopoverContent>
                             </Popover>
+
+                            {/* Logout Button (Mobile/Tablet) */}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onLogout}
+                                className="lg:hidden"
+                            >
+                                <LogOut className="h-5 w-5 text-red-600" />
+                            </Button>
                         </div>
                     </div>
-                    
-                    {/* Search Icon for Mobile */}
-                    {/* <div className="relative w-full">
-                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <input
-                            className="pl-10 w-full px-3 py-2 border rounded"
-                            placeholder="Search..."
-                            type="search"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            aria-label="Search"
-                        />
-                    </div> */}
                 </div>
             </div>
         </header>

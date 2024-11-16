@@ -36,13 +36,13 @@ const Sidebar = ({ activeItem, setActiveItem, onLogout }) => {
               </button>
             ))}
             
-            {/* Logout Button */}
+            {/* Logout Button - Only visible on desktop */}
             <button
               onClick={onLogout}
-              className="flex items-center justify-center lg:justify-start lg:gap-3 p-2 lg:px-4 lg:py-2 text-sm rounded-3xl lg:rounded-xl transition-colors duration-200 min-w-[3rem] md:min-w-[3.5rem] lg:min-w-0 lg:w-full text-white lg:text-red-600 hover:bg-white/10 lg:hover:bg-red-50"
+              className="hidden lg:flex items-center justify-start gap-3 p-2 px-4 py-2 text-sm rounded-xl transition-colors duration-200 w-full text-red-600 hover:bg-red-50"
             >
-              <LogOut className="w-6 h-6 lg:w-5 lg:h-5 text-white lg:text-red-600" />
-              <span className="hidden lg:inline">Logout</span>
+              <LogOut className="w-5 h-5 text-red-600" />
+              <span>Logout</span>
             </button>
           </div>
         </nav>
