@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import DataTable from '../../component/common/DataTable';
-import DataCard from '../../component/common/DataCard';
-import EditModal from '../../component/common/EditModal';
-
+import React, { useState, useEffect } from "react";
+import DataTable from "../../component/common/DataTable";
+import DataCard from "../../component/common/DataCard";
+import EditModal from "../../component/common/EditModal";
 
 // Sample data tetap sama
 const initialData = [
@@ -41,7 +40,29 @@ const initialData = [
   },
   {
     id: "YK-20241027-0001",
-    name: "Agus Santoso",
+    name: "Santoso",
+    location: "Jl Melati No. 12 Komplek",
+    driver: "Fauzi Witowo",
+    type: "Alumunium",
+    amount: "30 Kg",
+    date: "Oct 27, 2024",
+    time: "08:00",
+    status: "Berhasil",
+  },
+  {
+    id: "YK-20241027-0001",
+    name: "Varga",
+    location: "Jl Melati No. 12 Komplek",
+    driver: "Fauzi Witowo",
+    type: "Alumunium",
+    amount: "30 Kg",
+    date: "Oct 27, 2024",
+    time: "08:00",
+    status: "Berhasil",
+  },
+  {
+    id: "YK-20241027-0001",
+    name: "Santosos",
     location: "Jl Melati No. 12 Komplek",
     driver: "Fauzi Witowo",
     type: "Alumunium",
@@ -95,7 +116,18 @@ const initialData = [
     status: "Berhasil",
   },
   {
-    id: "YK-20241027-0002",
+    id: "YK-20241027-0001",
+    name: "Agus Santoso",
+    location: "Jl Melati No. 12 Komplek",
+    driver: "Fauzi Witowo",
+    type: "Alumunium",
+    amount: "30 Kg",
+    date: "Oct 27, 2024",
+    time: "08:00",
+    status: "Berhasil",
+  },
+  {
+    id: "YK-20241027-0001",
     name: "Agus Santoso",
     location: "Jl Melati No. 12 Komplek",
     driver: "Fauzi Witowo",
@@ -110,8 +142,8 @@ const initialData = [
 // Komponen Search baru
 const SearchBar = ({ onSearch, searchFields }) => {
   const [searchParams, setSearchParams] = useState({
-    searchText: '',
-    searchField: 'all'
+    searchText: "",
+    searchField: "all",
   });
 
   const handleSearch = (e) => {
@@ -141,7 +173,7 @@ const SearchBar = ({ onSearch, searchFields }) => {
           onChange={handleSearch}
         >
           <option value="all">Semua Field</option>
-          {searchFields.map(field => (
+          {searchFields.map((field) => (
             <option key={field.key} value={field.key}>
               {field.label}
             </option>
@@ -152,7 +184,7 @@ const SearchBar = ({ onSearch, searchFields }) => {
   );
 };
 
-const YukAngkutContent = ({ searchQuery = '' }) => {
+const YukAngkutContent = ({ searchQuery = "" }) => {
   const [data, setData] = useState(initialData);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -160,34 +192,34 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
 
   // Define columns configuration
   const columns = [
-    { key: 'id', label: 'Pickup ID' },
-    { key: 'name', label: 'Nama' },
-    { key: 'location', label: 'Lokasi' },
-    { key: 'driver', label: 'Driver' },
-    { key: 'type', label: 'Jenis' },
-    { key: 'amount', label: 'Jumlah(Kg)' },
-    { key: 'date', label: 'Tanggal & Jam' },
-    { key: 'status', label: 'Status' }
+    { key: "id", label: "Pickup ID" },
+    { key: "name", label: "Nama" },
+    { key: "location", label: "Lokasi" },
+    { key: "driver", label: "Driver" },
+    { key: "type", label: "Jenis" },
+    { key: "amount", label: "Jumlah(Kg)" },
+    { key: "date", label: "Tanggal & Jam" },
+    { key: "status", label: "Status" },
   ];
 
   // Define card sections for mobile view
   const cardSections = [
     {
-      title: 'Personal Info',
+      title: "Personal Info",
       fields: [
-        { key: 'name', label: 'Nama' },
-        { key: 'location', label: 'Lokasi' },
-        { key: 'driver', label: 'Driver' }
-      ]
+        { key: "name", label: "Nama" },
+        { key: "location", label: "Lokasi" },
+        { key: "driver", label: "Driver" },
+      ],
     },
     {
-      title: 'Pickup Details',
+      title: "Pickup Details",
       fields: [
-        { key: 'type', label: 'Jenis' },
-        { key: 'amount', label: 'Jumlah' },
-        { key: 'date', label: 'Waktu' }
-      ]
-    }
+        { key: "type", label: "Jenis" },
+        { key: "amount", label: "Jumlah" },
+        { key: "date", label: "Waktu" },
+      ],
+    },
   ];
 
   const handleSearch = ({ searchText, searchField }) => {
@@ -196,13 +228,16 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
       return;
     }
 
-    const filtered = data.filter(item => {
-      if (searchField === 'all') {
-        return Object.values(item).some(value =>
+    const filtered = data.filter((item) => {
+      if (searchField === "all") {
+        return Object.values(item).some((value) =>
           value.toString().toLowerCase().includes(searchText.toLowerCase())
         );
       } else {
-        return item[searchField].toString().toLowerCase().includes(searchText.toLowerCase());
+        return item[searchField]
+          .toString()
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
       }
     });
 
@@ -211,14 +246,14 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 'Berhasil':
-        return 'bg-green-100 text-green-800';
-      case 'Gagal':
-        return 'bg-red-100 text-red-800';
-      case 'Proses':
-        return 'bg-yellow-100 text-yellow-800';
+      case "Berhasil":
+        return "bg-green-100 text-green-800";
+      case "Gagal":
+        return "bg-red-100 text-red-800";
+      case "Proses":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -228,15 +263,15 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = data.filter(item => item.id !== id);
+    if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+      const newData = data.filter((item) => item.id !== id);
       setData(newData);
       setFilteredData(newData);
     }
   };
 
   const handleUpdate = (updatedData) => {
-    const newData = data.map(item =>
+    const newData = data.map((item) =>
       item.id === updatedData.id ? updatedData : item
     );
     setData(newData);
@@ -259,13 +294,10 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
       </div>
 
       {/* Search Component */}
-      <SearchBar 
-        onSearch={handleSearch}
-        searchFields={columns}
-      />
+      <SearchBar onSearch={handleSearch} searchFields={columns} />
 
       {/* Desktop Table View */}
-      <DataTable 
+      <DataTable
         data={filteredData}
         columns={columns}
         handleEdit={handleEdit}
@@ -276,7 +308,7 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {filteredData.map((row) => (
-          <DataCard 
+          <DataCard
             key={row.id}
             data={row}
             sections={cardSections}
@@ -295,7 +327,7 @@ const YukAngkutContent = ({ searchQuery = '' }) => {
             setSelectedData(null);
           }}
           data={selectedData}
-          fields={columns.filter(col => col.key !== 'id')}
+          fields={columns.filter((col) => col.key !== "id")}
           onUpdate={handleUpdate}
         />
       )}
