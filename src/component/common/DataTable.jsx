@@ -1,9 +1,6 @@
 import React from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, Upload } from 'lucide-react'; // Hapus import Eye
 
-/**
- * Komponen DataTable untuk menampilkan data dalam bentuk tabel
- */
 const DataTable = ({ 
   data, 
   columns, 
@@ -11,9 +8,12 @@ const DataTable = ({
   handleDelete, 
   contentType = 'default', 
   onImageClick,
-  imageUrlMap 
+  imageUrlMap,
+  renderActions,
+  getStatusBadgeClassProp 
 }) => {
-  const getStatusBadgeClass = (status) => {
+  // Fungsi status badge dari versi pertama
+  const getDefaultStatusBadgeClass = (status) => {
     if (contentType === 'users') {
       switch (status?.toLowerCase()) {
         case 'aktif':
@@ -36,6 +36,9 @@ const DataTable = ({
     }
   };
 
+  // Menggunakan custom getStatusBadgeClass jika disediakan, jika tidak menggunakan default
+  const getStatusBadgeClass = getStatusBadgeClassProp || getDefaultStatusBadgeClass;
+
   const getRoleBadgeClass = (role) => {
     let baseClasses = 'rounded-full text-xs';
     if (role?.toLowerCase() === 'admin') {
@@ -55,13 +58,20 @@ const DataTable = ({
               className="w-10 h-10 object-cover rounded cursor-pointer"
               onClick={() => onImageClick?.(row[column.key])}
             />
-            <button
-              onClick={() => onImageClick?.(row[column.key])}
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              Lihat Foto
-            </button>
           </div>
+        );
+      case 'receipt':
+        return row[column.key] ? (
+          <div className="flex items-center space-x-2">
+            <img 
+              src={row[column.key]}
+              alt="Receipt" 
+              className="w-10 h-10 object-cover rounded cursor-pointer"
+              onClick={() => onImageClick?.(row[column.key])}
+            />
+          </div>
+        ) : (
+          <span className="text-gray-400 text-sm">No receipt</span>
         );
       case 'status':
         return (
@@ -111,20 +121,22 @@ const DataTable = ({
                   </td>
                 ))}
                 <td className="p-3">
-                  <div className="flex gap-2">
-                    <button 
-                      className="p-2 text-sm font-medium text-blue-600 rounded hover:bg-blue-100"
-                      onClick={() => handleEdit(row)}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button 
-                      className="p-2 text-sm font-medium text-red-600 rounded hover:bg-red-100"
-                      onClick={() => handleDelete(row.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {renderActions ? renderActions(row) : (
+                    <div className="flex gap-2">
+                      <button 
+                        className="p-2 text-sm font-medium text-blue-600 rounded hover:bg-blue-100"
+                        onClick={() => handleEdit(row)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        className="p-2 text-sm font-medium text-red-600 rounded hover:bg-red-100"
+                        onClick={() => handleDelete(row.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
