@@ -5,123 +5,24 @@ import EditModal from '../../component/common/EditModal';
 import AddModal from './AddModal';
 import { PlusCircle } from 'lucide-react';
 
-// Sample data with unique IDs
-const initialData = [
-  {
-    id: '1',
-    name: "Agus Santoso sip",
-    email: "agussantos@gmail.com",
-    number: "085312345678",
-    addres: "Jl Melati No. 12 Komplek",
-    role: "Admin",
-    status: "Aktif",
-  },
-  {
-    id: '2',
-    name: "Agus Santoso",
-    email: "agussantos@gmail.com",
-    number: "085312345678",
-    addres: "Jl Melati No. 12 Komplek",
-    role: "Admin",
-    status: "Aktif",
-  },
-  {
-    id: '3',
-    name: "ahmad Agus Santoso",
-    email: "agussantos@gmail.com",
-    number: "085312345678",
-    addres: "Jl Melati No. 12 Komplek",
-    role: "Admin",
-    status: "Aktif",
-  },
-  {
-    id: '4',
-    name: "kepin yoga",
-    email: "kepin@gmail.com",
-    number: "085312345678",
-    addres: "Jl Melati No. 12 Komplek",
-    role: "Admin",
-    status: "Aktif",
-  },
-];
-
-// SearchBar Component
-const SearchBar = ({ data, onSearch }) => {
-  const [searchText, setSearchText] = useState('');
-  const [searchField, setSearchField] = useState('all');
-
-  const performSearch = (text, field) => {
-    const searchTerm = text.toLowerCase().trim();
-    
-    return data.filter(item => {
-      if (field === 'all') {
-        return Object.values(item).some(value => 
-          value.toString().toLowerCase().includes(searchTerm)
-        );
-      } else {
-        const itemValue = item[field].toString().toLowerCase();
-        return itemValue.includes(searchTerm);
-      }
-    });
-  };
-
-  const handleInputChange = (e) => {
-    const newSearchText = e.target.value;
-    setSearchText(newSearchText);
-    const results = performSearch(newSearchText, searchField);
-    onSearch(results);
-  };
-
-  const handleFieldChange = (e) => {
-    const newSearchField = e.target.value;
-    setSearchField(newSearchField);
-    const results = performSearch(searchText, newSearchField);
-    onSearch(results);
-  };
-
-  return (
-    <div className="mb-6 flex flex-col sm:flex-row gap-4">
-      <div className="flex-1">
-        <input
-          type="text"
-          placeholder="Cari data..."
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchText}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div className="sm:w-48">
-        <select
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchField}
-          onChange={handleFieldChange}
-        >
-          <option value="all">Semua Field</option>
-          {Object.keys(initialData[0]).map(key => (
-            <option key={key} value={key}>{key}</option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-};
-
 const UsersContent = () => {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]); // Mulai dengan array kosong
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [filteredData, setFilteredData] = useState(data);
 
+  // Kolom untuk DataTable
   const columns = [
     { key: 'name', label: 'Nama' },
     { key: 'email', label: 'Email' },
     { key: 'number', label: 'Nomor Telepon' },
-    { key: 'addres', label: 'Alamat' },
+    { key: 'address', label: 'Alamat' },
     { key: 'role', label: 'Role' },
     { key: 'status', label: 'Status' }
   ];
 
+  // Bagian informasi untuk DataCard
   const cardSections = [
     {
       title: 'Personal Info',
@@ -129,24 +30,47 @@ const UsersContent = () => {
         { key: 'name', label: 'Nama' },
         { key: 'email', label: 'Email' },
         { key: 'number', label: 'Nomor Telepon' },
-        { key: 'addres', label: 'Alamat' },
+        { key: 'address', label: 'Alamat' },
         { key: 'role', label: 'Role' },
       ]
     }
   ];
 
+  // Fungsi untuk mengambil data admin dari API
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/user/admins', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch admins');
+        }
+        const admins = await response.json();
+        setData(admins);
+        setFilteredData(admins);
+      } catch (error) {
+        console.error('Error fetching admins:', error);
+      }
+    };
+    fetchAdmins();
+  }, []);
+
+  // Fungsi pencarian
   const handleSearch = (searchResults) => {
     setFilteredData(searchResults);
   };
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 'Berhasil':
+      case 'Aktif':
         return 'bg-green-100 text-green-800';
-      case 'Gagal':
+      case 'Tidak Aktif':
         return 'bg-red-100 text-red-800';
-      case 'Proses':
-        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -162,35 +86,69 @@ const UsersContent = () => {
     setSelectedData(rowData);
     setIsEditModalOpen(true);
   };
-
-  const handleDelete = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = data.filter(item => item.id !== id);
-      setData(newData);
-      setFilteredData(newData);
+  
+  const handleDelete = async (id) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus admin ini?')) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/user/admins/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          alert('Admin berhasil dihapus');
+          setData(data.filter(admin => admin.id !== id));
+        } else {
+          alert('Gagal menghapus admin');
+        }
+      } catch (error) {
+        console.error('Error deleting admin:', error);
+        alert('Error deleting admin');
+      }
     }
   };
 
-  const handleUpdate = (updatedData) => {
-    const newData = data.map(item => {
-      if (item.id === selectedData.id) {
-        return {
-          ...item,
-          ...updatedData
-        };
-      }
-      return item;
-    });
-    
-    setData(newData);
-    setFilteredData(newData);
-    setIsEditModalOpen(false);
-    setSelectedData(null);
-  };
+  const handleUpdate = async (updatedData) => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/user/admins/${selectedData.id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update admin');
+        }
 
-  useEffect(() => {
-    setFilteredData(data);
-  }, [data]);
+        const updatedAdmin = await response.json();
+
+        // Update the local state after a successful response from the server
+        const newData = data.map(item => {
+            if (item.id === selectedData.id) {
+                return {
+                    ...item,
+                    ...updatedAdmin
+                };
+            }
+            return item;
+        });
+        
+        setData(newData);
+        setFilteredData(newData);
+        setIsEditModalOpen(false);
+        setSelectedData(null);
+        alert('Admin updated successfully');
+    } catch (error) {
+        console.error('Error updating admin:', error);
+        alert('Error updating admin');
+    }
+};
 
   return (
     <div>
@@ -198,7 +156,7 @@ const UsersContent = () => {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-xl font-semibold">Daftar Admin</h2>
-            <p className="text-sm text-gray-500">This is a list of latest Orders</p>
+            <p className="text-sm text-gray-500">This is a list of all admin users</p>
           </div>
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -210,10 +168,7 @@ const UsersContent = () => {
         </div>
       </div>
 
-      <SearchBar
-        data={data}
-        onSearch={handleSearch}
-      />
+      <SearchBar data={data} onSearch={handleSearch} />
 
       <DataTable 
         data={filteredData}
@@ -262,6 +217,68 @@ const UsersContent = () => {
           <p className="text-gray-500">Tidak ada data yang ditemukan</p>
         </div>
       )}
+    </div>
+  );
+};
+
+// SearchBar Component untuk pencarian data
+const SearchBar = ({ data, onSearch }) => {
+  const [searchText, setSearchText] = useState('');
+  const [searchField, setSearchField] = useState('all');
+
+  const performSearch = (text, field) => {
+    const searchTerm = text.toLowerCase().trim();
+    return data.filter(item => {
+      if (field === 'all') {
+        return Object.values(item).some(value => 
+          value != null && value.toString().toLowerCase().includes(searchTerm)
+        );
+      } else {
+        const itemValue = item[field];
+        return itemValue != null && itemValue.toString().toLowerCase().includes(searchTerm);
+      }
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const newSearchText = e.target.value;
+    setSearchText(newSearchText);
+    const results = performSearch(newSearchText, searchField);
+    onSearch(results);
+  };
+
+  const handleFieldChange = (e) => {
+    const newSearchField = e.target.value;
+    setSearchField(newSearchField);
+    const results = performSearch(searchText, newSearchField);
+    onSearch(results);
+  };
+
+  return (
+    <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="flex-1">
+        <input
+          type="text"
+          placeholder="Cari data..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchText}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className="sm:w-48">
+        <select
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchField}
+          onChange={handleFieldChange}
+        >
+          <option value="all">Semua Field</option>
+          <option value="id">ID</option>
+          <option value="name">Nama</option>
+          <option value="email">Email</option>
+          <option value="role">Role</option>
+          <option value="address">Alamat</option>
+        </select>
+      </div>
     </div>
   );
 };

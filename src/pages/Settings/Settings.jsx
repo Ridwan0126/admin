@@ -1,10 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useUser } from '@/component/layout/UserContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useUser } from '../../component/layout/UserContext';
 import {
   Select,
   SelectContent,
@@ -20,69 +19,145 @@ import {
 } from "@/components/ui/dialog";
 
 const Settings = () => {
+  const { fetchUserProfile, setUserProfile, userProfile } = useUser();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { userProfile, updateUserProfile } = useUser();
   const [profileData, setProfileData] = useState({
-    firstName: userProfile?.firstName || '',
-    lastName: userProfile?.lastName || '',
-    email: "mulyonognwn@gmail.com",
-    phone: "085712345678",
-    gender: "female",
-    role: userProfile?.role || '',
-    address: "Jl. Hang Lekiu KM 2 Nongsa Batam Indonesia.",
-    profileImage: userProfile?.profileImage || "/Avatar.svg?height=96&width=96"
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    gender: '',
+    role: '',
+    address: '',
+    profileImage: '/Avatar.svg' 
   });
   const fileInputRef = useRef(null);
 
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const updatedData = {
-      ...profileData,
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      gender: formData.get("gender"),
-      role: formData.get("role"),
-      address: formData.get("address"),
-    };
-    setProfileData(updatedData);
-    updateUserProfile({
-      firstName: updatedData.firstName,
-      lastName: updatedData.lastName,
-      role: updatedData.role,
-      profileImage: updatedData.profileImage
-    });
-    setIsEditDialogOpen(false);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result;
-        setProfileData(prev => ({
-          ...prev,
-          profileImage: imageUrl
-        }));
-        updateUserProfile({ ...userProfile, profileImage: imageUrl });
-      };
-      reader.readAsDataURL(file);
+  useEffect(() => {
+    if (userProfile) {
+        console.log("Data userProfile di frontend:", userProfile); // Debugging
+        setProfileData({
+            ...userProfile,
+            profileImage: userProfile.profileImage || '/Avatar.svg' // Set default jika kosong
+        });
     }
-  };
+}, [userProfile]);
+  
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleDeleteImage = () => {
-    const defaultImage = "/Avatar.svg?height=96&width=96";
-    setProfileData(prev => ({
-      ...prev,
-      profileImage: defaultImage
-    }));
-    updateUserProfile({ ...userProfile, profileImage: defaultImage });
-  };
+    const updatedProfileData = {
+        ...profileData,
+        gender: profileData.gender
+    };
 
-  // Render function for EditDialog
+    try {
+        const response = await fetch('http://localhost:5000/api/user/profile', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedProfileData),
+        });
+
+        if (response.ok) {
+            const updatedData = await response.json();
+            alert('Profile updated successfully');
+
+            const newProfileData = {
+                ...updatedData,
+                gender: updatedData.gender === 'Perempuan' ? 'female' : 'male'
+            };
+            setProfileData(newProfileData);
+            setUserProfile(newProfileData);
+            localStorage.setItem('userProfile', JSON.stringify(newProfileData)); 
+
+            setIsEditDialogOpen(false);
+        } else {
+            alert('Failed to update profile');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+    }
+};
+
+const handleImageChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result;
+
+      setProfileData((prev) => ({
+        ...prev,
+        profileImage: base64String
+      }));
+      setUserProfile((prev) => ({
+        ...prev,
+        profileImage: base64String
+      }));
+      localStorage.setItem('userProfile', JSON.stringify({ ...profileData, profileImage: base64String }));
+
+      // Lakukan PUT request ke backend untuk menyimpan perubahan gambar
+      try {
+        const response = await fetch('http://localhost:5000/api/user/profile', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ profileImage: base64String }) // Kirim profileImage
+        });
+
+        if (response.ok) {
+          console.log('Profile image updated successfully');
+        } else {
+          console.error('Failed to update profile image');
+        }
+      } catch (error) {
+        console.error('Error updating profile image:', error);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+
+// Handle penghapusan gambar
+const handleDeleteImage = async () => {
+  setProfileData((prev) => ({
+    ...prev,
+    profileImage: ''
+  }));
+  setUserProfile((prev) => ({
+    ...prev,
+    profileImage: ''
+  }));
+  localStorage.setItem('userProfile', JSON.stringify({ ...profileData, profileImage: '' }));
+
+  // Lakukan PUT request ke backend untuk menyimpan perubahan gambar
+  try {
+    const response = await fetch('http://localhost:5000/api/user/profile', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ profileImage: '' }) // Kirim profileImage kosong
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete profile image');
+    }
+
+    console.log('Profile image deleted successfully');
+  } catch (error) {
+    console.error('Error deleting profile image:', error);
+  }
+};
+
+
   const renderEditDialog = () => (
     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
       <DialogContent className="max-w-md">
@@ -96,7 +171,8 @@ const Settings = () => {
               <Input
                 id="firstName"
                 name="firstName"
-                defaultValue={profileData.firstName}
+                value={profileData.firstName || ""}
+                onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -104,18 +180,20 @@ const Settings = () => {
               <Input
                 id="lastName"
                 name="lastName"
-                defaultValue={profileData.lastName}
+                value={profileData.lastName || ""}
+                onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              defaultValue={profileData.email}
+              value={profileData.email}
+              onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
             />
           </div>
 
@@ -125,13 +203,18 @@ const Settings = () => {
               id="phone"
               name="phone"
               type="tel"
-              defaultValue={profileData.phone}
+              value={profileData.phone}
+              onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <Select name="gender" defaultValue={profileData.gender}>
+            <Select
+              name="gender"
+              value={profileData.gender || "female"}
+              onValueChange={(value) => setProfileData({ ...profileData, gender: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
@@ -147,7 +230,8 @@ const Settings = () => {
             <Input
               id="role"
               name="role"
-              defaultValue={profileData.role}
+              value={profileData.role}
+              readOnly
             />
           </div>
 
@@ -156,7 +240,8 @@ const Settings = () => {
             <textarea
               id="address"
               name="address"
-              defaultValue={profileData.address}
+              value={profileData.address}
+              onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
               rows={3}
               className="w-full border rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />

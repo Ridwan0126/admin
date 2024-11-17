@@ -1,33 +1,59 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [userProfile, setUserProfile] = useState({
-    firstName: "Ahmad",
-    lastName: "Mulyono",
-    role: "Admin",
-    profileImage: "/Avatar.svg?height=96&width=96"
-  });
+    const [userProfile, setUserProfile] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        gender: "",
+        role: "",
+        address: "",
+        profileImage: '/Avatar.svg'
+    });
 
-  const updateUserProfile = (newData) => {
-    setUserProfile(prev => ({
-      ...prev,
-      ...newData
-    }));
-  };
+    const fetchUserProfile = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const response = await fetch('http://localhost:5000/api/user/profile', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log("Data profileImage dari backend di frontend:", data.profileImage); // Debugging
+                  
+                  setUserProfile({
+                      ...data,
+                      profileImage: data.profileImage || '/Avatar.svg' // Gunakan default jika kosong
+                  });
+                  localStorage.setItem('userProfile', JSON.stringify({ ...data, profileImage: data.profileImage || '/Avatar.svg' }));
+              } else {
+                    console.error('Failed to fetch user profile:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+    };
 
-  return (
-    <UserContext.Provider value={{ userProfile, updateUserProfile }}>
-      {children}
-    </UserContext.Provider>
-  );
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    return (
+        <UserContext.Provider value={{ userProfile, setUserProfile, fetchUserProfile }}>
+            {children}
+        </UserContext.Provider>
+    );
 };
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
+export const useUser = () => useContext(UserContext);
+
+export { UserContext };

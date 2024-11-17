@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SearchIcon, Mail, Bell } from 'lucide-react';
 import { useUser } from './UserContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,38 +21,38 @@ const notifications = [
 
 const Navbar = ({ pageTitle }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const { userProfile } = useUser();
+    const [userProfile, setUserProfile] = useState(null);
+
+    // Effect to get user data from localStorage
+    useEffect(() => {
+        const updateUserFromLocalStorage = () => {
+            const userData = JSON.parse(localStorage.getItem('userProfile'));
+            setUserProfile(userData);
+        };
+
+        updateUserFromLocalStorage();
+        window.addEventListener('storage', updateUserFromLocalStorage);
+
+        return () => {
+            window.removeEventListener('storage', updateUserFromLocalStorage);
+        };
+    }, []);
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
 
-    const fullName = `${userProfile.firstName} ${userProfile.lastName}`;
+    const fullName = userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : 'Admin';
 
     return (
         <header className="bg-white shadow-sm sticky top-0 z-40">
             <div className="p-4">
-                {/* Desktop Header */}
                 <div className="hidden lg:flex items-center justify-between">
                     <div className="flex items-center ml-2">
                         <h1 className="text-xl font-semibold text-[#2CC297]">{pageTitle}</h1>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Search Icon */}
-                        {/* <div className="relative w-64">
-                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input
-                                className="pl-10 w-full px-3 py-2 border rounded"
-                                placeholder="Search..."
-                                type="search"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                aria-label="Search"
-                            />
-                        </div> */}
-
-                        {/* Messages Popover */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="ghost" size="icon" className="relative">
@@ -86,7 +86,6 @@ const Navbar = ({ pageTitle }) => {
                             </PopoverContent>
                         </Popover>
 
-                        {/* Notifications Popover */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="ghost" size="icon" className="relative">
@@ -119,10 +118,10 @@ const Navbar = ({ pageTitle }) => {
                         <div className="flex items-center gap-3">
                             <div className="text-right">
                                 <div className="text-sm font-medium">{fullName}</div>
-                                <div className="text-xs text-gray-500">{userProfile.role}</div>
+                                <div className="text-xs text-gray-500">{userProfile ? userProfile.role : ''}</div>
                             </div>
                             <img
-                                src={userProfile.profileImage}
+                                src={userProfile?.profileImage || "/Avatar.svg"}
                                 alt="Profile"
                                 className="w-10 h-10 rounded-full object-cover"
                             />
@@ -130,22 +129,20 @@ const Navbar = ({ pageTitle }) => {
                     </div>
                 </div>
 
-                {/* Mobile Header */}
                 <div className="lg:hidden space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <img
-                                src={userProfile.profileImage}
+                                src={userProfile?.profileImage || "/Avatar.svg"}
                                 alt="Profile"
                                 className="w-10 h-10 rounded-full object-cover"
                             />
                             <div className="text-left hidden sm:block">
                                 <div className="text-sm font-medium">{fullName}</div>
-                                <div className="text-xs text-gray-500">{userProfile.role}</div>
+                                <div className="text-xs text-gray-500">{userProfile ? userProfile.role : ''}</div>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            {/* Messages Popover (Mobile) */}
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="ghost" size="icon" className="relative">
@@ -179,7 +176,6 @@ const Navbar = ({ pageTitle }) => {
                                 </PopoverContent>
                             </Popover>
 
-                            {/* Notifications Popover (Mobile) */}
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="ghost" size="icon" className="relative">
@@ -210,19 +206,6 @@ const Navbar = ({ pageTitle }) => {
                             </Popover>
                         </div>
                     </div>
-                    
-                    {/* Search Icon for Mobile */}
-                    {/* <div className="relative w-full">
-                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <input
-                            className="pl-10 w-full px-3 py-2 border rounded"
-                            placeholder="Search..."
-                            type="search"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            aria-label="Search"
-                        />
-                    </div> */}
                 </div>
             </div>
         </header>

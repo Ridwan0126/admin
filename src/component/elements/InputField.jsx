@@ -1,32 +1,23 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-/**
- * Komponen Input Field yang dapat dikustomisasi
- * @param {string} label - Label untuk input field
- * @param {string} type - Tipe input (text, password, dll)
- * @param {string} placeholder - Teks placeholder
- * @param {boolean} isPassword - Menandakan apakah input untuk password
- */
 const InputField = ({ 
     label, 
     type = "text", 
     placeholder, 
-    isPassword = false 
-  }) => {
-    // State untuk mengatur focus pada input
+    isPassword = false,
+    value,             // Tambahkan value
+    onChange           // Tambahkan onChange
+}) => {
     const [isFocused, setIsFocused] = useState(false);
-    // State untuk mengatur visibility password
     const [showPassword, setShowPassword] = useState(false);
-  
-    // Menentukan apakah label harus mengambang di atas input
-    const isLabelFloating = isFocused || showPassword;
-  
+
+    // Tambahkan kondisi untuk mengecek apakah label harus di atas
+    const isLabelFloating = isFocused || showPassword || value; // periksa apakah ada nilai untuk mengatur floating label
+
     return (
-      // Kontainer input field
       <div className="relative mb-6">
         <div className="relative">
-          {/* Input element */}
           <input
             type={isPassword ? (showPassword ? "text" : "password") : type}
             className="w-full px-3 py-2 text-sm border-4 rounded-lg h-12 text-slate-700
@@ -36,9 +27,11 @@ const InputField = ({
             }}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            value={value}                // Tambahkan value di sini
+            onChange={onChange}           // Tambahkan onChange di sini
+            placeholder={placeholder}     // Tambahkan placeholder
           />
           
-          {/* Tombol toggle password visibility */}
           {isPassword && (
             <button
               type="button"
@@ -49,8 +42,7 @@ const InputField = ({
             </button>
           )}
         </div>
-  
-        {/* Label yang mengambang */}
+
         <label 
           className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none
           ${isLabelFloating ? '-top-3 text-slate-700 text-sm' : 'top-2.5 text-slate-500'}`}
@@ -59,6 +51,6 @@ const InputField = ({
         </label>
       </div>
     );
-  };
+};
 
 export default InputField;

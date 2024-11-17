@@ -5,7 +5,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    addres: '',
+    address: '',
     email: '',
     number: '',
     role: 'Admin',
@@ -20,24 +20,44 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newUser = {
-      id: Date.now().toString(), // Generate a unique ID
       name: `${formData.firstName} ${formData.lastName}`,
       email: formData.email,
       number: formData.number,
-      addres: formData.addres,
+      address: formData.address,
       role: formData.role,
       status: formData.status
     };
-    onAdd(newUser);
-    onClose();
+
+    try {
+      const response = await fetch('http://localhost:5000/api/user/admins', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      if (response.ok) {
+        const addedUser = await response.json();
+        onAdd(addedUser); // Panggil onAdd untuk memperbarui UI dengan data baru
+        onClose();
+      } else {
+        alert('Failed to add admin');
+      }
+    } catch (error) {
+      console.error('Error adding admin:', error);
+    }
+
     // Reset form
     setFormData({
       firstName: '',
       lastName: '',
-      addres: '',
+      address: '',
       email: '',
       number: '',
       role: 'Admin',
@@ -51,11 +71,8 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg w-full max-w-md">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-lg font-semibold">Tambah User Baru</h2>
-          <button 
-            onClick={onClose} 
-            className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
-          >
+          <h2 className="text-lg font-semibold">Tambah Admin Baru</h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded transition-colors duration-200">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -63,9 +80,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Nama Depan
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Nama Depan</label>
               <input
                 type="text"
                 name="firstName"
@@ -76,9 +91,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Nama Belakang
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Nama Belakang</label>
               <input
                 type="text"
                 name="lastName"
@@ -91,13 +104,11 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Alamat
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Alamat</label>
             <input
               type="text"
-              name="addres"
-              value={formData.addres}
+              name="address"
+              value={formData.address}
               onChange={handleChange}
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
@@ -105,9 +116,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               name="email"
@@ -119,9 +128,7 @@ const AddModal = ({ isOpen, onClose, onAdd }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Nomor Telepon
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Nomor Telepon</label>
             <input
               type="tel"
               name="number"

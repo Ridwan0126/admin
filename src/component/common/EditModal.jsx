@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 /**
@@ -13,6 +13,13 @@ import { X } from 'lucide-react';
 const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'default' }) => {
   // State untuk menyimpan data formulir
   const [formData, setFormData] = useState(data);
+
+  // Sync formData with data prop when modal opens with new data
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(data);
+    }
+  }, [isOpen, data]);
 
   // Fungsi untuk mendapatkan opsi status berdasarkan tipe konten
   const getStatusOptions = () => {
@@ -66,7 +73,7 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
               {field.key === 'status' ? (
                 <select
                   name={field.key}
-                  value={formData[field.key]}
+                  value={formData[field.key] || ''} // Ensure controlled component
                   onChange={(e) => {
                     setFormData(prev => ({
                       ...prev,
@@ -81,7 +88,7 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
                 <input
                   type="text"
                   name={field.key}
-                  value={formData[field.key]}
+                  value={formData[field.key] || ''} // Ensure controlled component
                   onChange={(e) => {
                     setFormData(prev => ({
                       ...prev,
