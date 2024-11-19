@@ -6,13 +6,12 @@ import AddModal from './AddModal';
 import { PlusCircle } from 'lucide-react';
 
 const UsersContent = () => {
-  const [data, setData] = useState([]); // Mulai dengan array kosong
+  const [data, setData] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [filteredData, setFilteredData] = useState(data);
 
-  // Kolom untuk DataTable
   const columns = [
     { key: 'name', label: 'Nama' },
     { key: 'email', label: 'Email' },
@@ -22,7 +21,6 @@ const UsersContent = () => {
     { key: 'status', label: 'Status' }
   ];
 
-  // Bagian informasi untuk DataCard
   const cardSections = [
     {
       title: 'Personal Info',
@@ -36,7 +34,6 @@ const UsersContent = () => {
     }
   ];
 
-  // Fungsi untuk mengambil data admin dari API
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
@@ -47,9 +44,7 @@ const UsersContent = () => {
             'Content-Type': 'application/json',
           },
         });
-        if (!response.ok) {
-          throw new Error('Failed to fetch admins');
-        }
+        if (!response.ok) throw new Error('Failed to fetch admins');
         const admins = await response.json();
         setData(admins);
         setFilteredData(admins);
@@ -60,7 +55,6 @@ const UsersContent = () => {
     fetchAdmins();
   }, []);
 
-  // Fungsi pencarian
   const handleSearch = (searchResults) => {
     setFilteredData(searchResults);
   };
@@ -101,6 +95,7 @@ const UsersContent = () => {
         if (response.ok) {
           alert('Admin berhasil dihapus');
           setData(data.filter(admin => admin.id !== id));
+          setFilteredData(filteredData.filter(admin => admin.id !== id));
         } else {
           alert('Gagal menghapus admin');
         }
@@ -112,43 +107,43 @@ const UsersContent = () => {
   };
 
   const handleUpdate = async (updatedData) => {
-    try {
-        const response = await fetch(`http://localhost:5000/api/user/admins/${selectedData.id}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedData)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update admin');
-        }
-
-        const updatedAdmin = await response.json();
-
-        // Update the local state after a successful response from the server
-        const newData = data.map(item => {
-            if (item.id === selectedData.id) {
-                return {
-                    ...item,
-                    ...updatedAdmin
-                };
-            }
-            return item;
-        });
-        
-        setData(newData);
-        setFilteredData(newData);
-        setIsEditModalOpen(false);
-        setSelectedData(null);
-        alert('Admin updated successfully');
-    } catch (error) {
-        console.error('Error updating admin:', error);
-        alert('Error updating admin');
+    if (!selectedData || !selectedData.id) {
+      console.error('Selected data is missing ID:', selectedData);
+      return alert('Error: No selected admin to update.');
     }
-};
+  
+    // Hilangkan `gender` dari data yang dikirim ke backend
+    const dataToSend = { ...updatedData };
+    delete dataToSend.gender;
+  
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/admins/${selectedData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dataToSend)
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        console.error('Error updating admin:', errorDetails);
+        throw new Error(`Failed to update admin: ${errorDetails}`);
+      }
+  
+      const updatedAdmin = await response.json();
+      const newData = data.map(item => (item.id === selectedData.id ? { ...item, ...updatedAdmin } : item));
+      setData(newData);
+      setFilteredData(newData);
+      setIsEditModalOpen(false);
+      setSelectedData(null);
+      alert('Admin updated successfully');
+    } catch (error) {
+      console.error('Error updating admin:', error);
+      alert('Error updating admin');
+    }
+  };
 
   return (
     <div>

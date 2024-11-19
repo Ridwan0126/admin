@@ -1,27 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-/**
- * Komponen Modal untuk mengedit data
- * @param {boolean} isOpen - Status apakah modal terbuka atau tidak
- * @param {Function} onClose - Fungsi untuk menutup modal
- * @param {Object} data - Data yang akan diedit
- * @param {Array} fields - Field-field yang dapat diedit
- * @param {Function} onUpdate - Fungsi untuk mengupdate data
- * @param {string} contentType - Tipe konten untuk menentukan opsi status
- */
 const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'default' }) => {
-  // State untuk menyimpan data formulir
+  // State to store form data
   const [formData, setFormData] = useState(data);
 
-  // Sync formData with data prop when modal opens with new data
+  // Sync formData with new data when modal opens with updated data
   useEffect(() => {
     if (isOpen) {
-      setFormData(data);
+      setFormData(data || {}); // Set formData to the selected admin data or empty object if undefined
     }
   }, [isOpen, data]);
 
-  // Fungsi untuk mendapatkan opsi status berdasarkan tipe konten
+  // Generate status options based on content type
   const getStatusOptions = () => {
     if (contentType === 'users') {
       return (
@@ -40,26 +31,25 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
     );
   };
 
-  // Tidak menampilkan modal jika isOpen false
+  // Do not render if modal is closed
   if (!isOpen) return null;
 
   return (
-    // Overlay modal
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      {/* Konten modal */}
       <div className="bg-white rounded-lg w-full max-w-md">
-        {/* Header modal */}
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold">Edit Data</h2>
           <button 
-            onClick={onClose} 
+            onClick={() => {
+              onClose();
+              setFormData({}); // Optionally reset formData when modal closes
+            }} 
             className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        {/* Formulir edit */}
         <form onSubmit={(e) => {
           e.preventDefault();
           onUpdate(formData);
@@ -95,17 +85,20 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
                       [e.target.name]: e.target.value
                     }));
                   }}
+                  placeholder={`Enter ${field.label.toLowerCase()}`}
                   className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               )}
             </div>
           ))}
 
-          {/* Tombol aksi */}
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                setFormData({}); // Reset form data when closing
+              }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200"
             >
               Batal

@@ -85,78 +85,64 @@ const Settings = () => {
 const handleImageChange = async (e) => {
   const file = e.target.files?.[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64String = reader.result;
+      const formData = new FormData();
+      formData.append('profileImage', file);
 
-      setProfileData((prev) => ({
-        ...prev,
-        profileImage: base64String
-      }));
-      setUserProfile((prev) => ({
-        ...prev,
-        profileImage: base64String
-      }));
-      localStorage.setItem('userProfile', JSON.stringify({ ...profileData, profileImage: base64String }));
-
-      // Lakukan PUT request ke backend untuk menyimpan perubahan gambar
       try {
-        const response = await fetch('http://localhost:5000/api/user/profile', {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ profileImage: base64String }) // Kirim profileImage
-        });
+          const response = await fetch('http://localhost:5000/api/user/profile/upload', {
+              method: 'PUT',
+              headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              },
+              body: formData,  // Use FormData to send file
+          });
 
-        if (response.ok) {
-          console.log('Profile image updated successfully');
-        } else {
-          console.error('Failed to update profile image');
-        }
+          if (response.ok) {
+              const data = await response.json();
+              alert('Profile image uploaded successfully!');
+              setUserProfile((prev) => ({
+                  ...prev,
+                  profileImage: data.profileImage,  // Update the profileImage in the userProfile
+              }));
+          } else {
+              alert('Failed to upload profile image');
+          }
       } catch (error) {
-        console.error('Error updating profile image:', error);
+          console.error('Error uploading profile image:', error);
       }
-    };
-    reader.readAsDataURL(file);
   }
 };
 
-
 // Handle penghapusan gambar
 const handleDeleteImage = async () => {
-  setProfileData((prev) => ({
-    ...prev,
-    profileImage: ''
-  }));
-  setUserProfile((prev) => ({
-    ...prev,
-    profileImage: ''
-  }));
-  localStorage.setItem('userProfile', JSON.stringify({ ...profileData, profileImage: '' }));
-
-  // Lakukan PUT request ke backend untuk menyimpan perubahan gambar
   try {
-    const response = await fetch('http://localhost:5000/api/user/profile', {
-      method: 'PUT',
+    const response = await fetch('http://localhost:5000/api/user/profile/image', {
+      method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify({ profileImage: '' }) // Kirim profileImage kosong
     });
 
-    if (!response.ok) {
+    if (response.ok) {
+      alert('Profile image deleted successfully');
+      
+      // Update the state to reflect the default image
+      setProfileData((prev) => ({
+        ...prev,
+        profileImage: '/Avatar.svg'
+      }));
+      setUserProfile((prev) => ({
+        ...prev,
+        profileImage: '/Avatar.svg'
+      }));
+      localStorage.setItem('userProfile', JSON.stringify({ ...profileData, profileImage: '/Avatar.svg' }));
+    } else {
       throw new Error('Failed to delete profile image');
     }
-
-    console.log('Profile image deleted successfully');
   } catch (error) {
     console.error('Error deleting profile image:', error);
   }
 };
-
 
   const renderEditDialog = () => (
     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -280,7 +266,7 @@ const handleDeleteImage = async () => {
             </div>
             <div className="flex items-center space-x-4 mb-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={profileData.profileImage} alt="Profile picture" />
+              <AvatarImage src={`http://localhost:5000${profileData.profileImage}`} alt="Profile picture" />
                 <AvatarFallback>
                   {profileData.firstName?.[0] || ''}{profileData.lastName?.[0] || ''}
                 </AvatarFallback>

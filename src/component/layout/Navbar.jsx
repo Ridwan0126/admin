@@ -121,7 +121,7 @@ const Navbar = ({ pageTitle }) => {
                                 <div className="text-xs text-gray-500">{userProfile ? userProfile.role : ''}</div>
                             </div>
                             <img
-                                src={userProfile?.profileImage || "/Avatar.svg"}
+                                src={`http://localhost:5000${userProfile?.profileImage || "/Avatar.svg"}`}
                                 alt="Profile"
                                 className="w-10 h-10 rounded-full object-cover"
                             />
