@@ -162,7 +162,7 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                         </span>
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-screen max-w-[200px] p-0 " align="end" alignOffset={-8} sideOffset={8}>
+                                <PopoverContent className="w-screen max-w-[235px] p-0 " align="end" alignOffset={-8} sideOffset={8}>
                                     <Card className="shadow-lg">
                                         <div className="p-4 border-b">
                                             <h2 className="text-lg font-semibold">Pesan</h2>
