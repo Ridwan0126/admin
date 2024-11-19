@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const messages = [
   { id: 1, user: "@Budimulyono", avatar: "/placeholder.svg?height=32&width=32", message: "Permintaan baru! Pengguna budi telah meminta penjemputan sampah pada 12 November", time: "2m ago" },
@@ -39,36 +40,50 @@ const Navbar = ({ pageTitle, onLogout }) => {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        {/* Search Icon */}
+                        {/* <div className="relative w-64">
+                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                                className="pl-10 w-full px-3 py-2 border rounded"
+                                placeholder="Search..."
+                                type="search"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                aria-label="Search"
+                            />
+                        </div> */}
+
                         {/* Messages Popover */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="ghost" size="icon" className="relative">
                                     <Mail className="h-5 w-5" />
                                     <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                        4
+                                        {messages.length}
                                     </span>
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 p-0" align="end">
-                                <Card>
+                            <PopoverContent className="w-[400px] p-0" align="end">
+                                <Card className="shadow-lg">
                                     <div className="p-4 border-b">
-                                        <h3 className="font-semibold">Pesan</h3>
+                                        <h2 className="text-lg font-semibold">Pesan</h2>
                                     </div>
-                                    <div className="divide-y">
-                                        {messages.map((message) => (
-                                            <div key={message.id} className="p-4 flex gap-3 hover:bg-muted/50 transition-colors">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={message.avatar} alt={message.user} />
-                                                    <AvatarFallback>{message.user[1]}</AvatarFallback>
-                                                </Avatar>
-                                                <div className="space-y-1">
-                                                    <p className="text-sm font-medium leading-none">{message.user}</p>
-                                                    <p className="text-sm text-muted-foreground">{message.message}</p>
-                                                    <p className="text-xs text-muted-foreground">{message.time}</p>
+                                    <ScrollArea className="h-[400px]">
+                                        <div className="divide-y">
+                                            {messages.map((message) => (
+                                                <div key={message.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
+                                                    <Avatar className="h-10 w-10">
+                                                        <AvatarImage src={message.avatar} />
+                                                        <AvatarFallback>{message.user[1]}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1 space-y-1">
+                                                        <p className="text-sm font-medium text-black">{message.user}</p>
+                                                        <p className="text-sm text-gray-600">{message.message}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
                                 </Card>
                             </PopoverContent>
                         </Popover>
@@ -79,26 +94,31 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                 <Button variant="ghost" size="icon" className="relative">
                                     <Bell className="h-5 w-5" />
                                     <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                        3
+                                        {notifications.length}
                                     </span>
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 p-0" align="end">
-                                <Card>
+                            <PopoverContent className="w-[400px] p-0" align="end">
+                                <Card className="shadow-lg">
                                     <div className="p-4 border-b">
-                                        <h3 className="font-semibold">Notifikasi</h3>
+                                        <h2 className="text-lg font-semibold">Notifications</h2>
                                     </div>
-                                    <div className="divide-y">
-                                        {notifications.map((notification) => (
-                                            <div key={notification.id} className="p-4 hover:bg-muted/50 transition-colors">
-                                                <div className="space-y-1">
-                                                    <p className="text-sm font-medium leading-none">{notification.title}</p>
-                                                    <p className="text-sm text-muted-foreground">{notification.description}</p>
-                                                    <p className="text-xs text-muted-foreground">{notification.time}</p>
+                                    <ScrollArea className="h-[400px]">
+                                        <div className="divide-y">
+                                            {notifications.map((notification) => (
+                                                <div key={notification.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
+                                                    <Avatar className="h-10 w-10">
+                                                        <AvatarImage src={notification.avatar || "/placeholder.svg?height=40&width=40"} />
+                                                        <AvatarFallback>{notification.title[0]}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1 space-y-1">
+                                                        <p className="text-sm font-medium text-black">{notification.title}</p>
+                                                        <p className="text-sm text-gray-600">{notification.description}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
                                 </Card>
                             </PopoverContent>
                         </Popover>
@@ -138,30 +158,31 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                     <Button variant="ghost" size="icon" className="relative">
                                         <Mail className="h-5 w-5" />
                                         <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                            4
+                                            {messages.length}
                                         </span>
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-80 p-0" align="end">
-                                    <Card>
+                                <PopoverContent className="w-screen max-w-[200px] p-0 " align="end" alignOffset={-8} sideOffset={8}>
+                                    <Card className="shadow-lg">
                                         <div className="p-4 border-b">
-                                            <h3 className="font-semibold">Pesan</h3>
+                                            <h2 className="text-lg font-semibold">Pesan</h2>
                                         </div>
-                                        <div className="divide-y">
-                                            {messages.map((message) => (
-                                                <div key={message.id} className="p-4 flex gap-3 hover:bg-muted/50 transition-colors">
-                                                    <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={message.avatar} alt={message.user} />
-                                                        <AvatarFallback>{message.user[1]}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="space-y-1">
-                                                        <p className="text-sm font-medium leading-none">{message.user}</p>
-                                                        <p className="text-sm text-muted-foreground">{message.message}</p>
-                                                        <p className="text-xs text-muted-foreground">{message.time}</p>
+                                        <ScrollArea className="h-[370px]">
+                                            <div className="divide-y">
+                                                {messages.map((message) => (
+                                                    <div key={message.id} className="flex items-start gap-2 p-3 hover:bg-gray-50">
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage src={message.avatar} />
+                                                            <AvatarFallback>{message.user[1]}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="flex-1 space-y-1">
+                                                            <p className="text-sm font-medium text-black">{message.user}</p>
+                                                            <p className="text-sm text-gray-600 line-clamp-2">{message.message}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
                                     </Card>
                                 </PopoverContent>
                             </Popover>
@@ -172,32 +193,36 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                     <Button variant="ghost" size="icon" className="relative">
                                         <Bell className="h-5 w-5" />
                                         <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                            3
+                                            {notifications.length}
                                         </span>
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-80 p-0" align="end">
-                                    <Card>
+                                <PopoverContent className="w-screen max-w-[290px] p-0" align="end" alignOffset={-8} sideOffset={8}>
+                                    <Card className="shadow-lg">
                                         <div className="p-4 border-b">
-                                            <h3 className="font-semibold">Notifikasi</h3>
+                                            <h2 className="text-lg font-semibold">Notifications</h2>
                                         </div>
-                                        <div className="divide-y">
-                                            {notifications.map((notification) => (
-                                                <div key={notification.id} className="p-4 hover:bg-muted/50 transition-colors">
-                                                    <div className="space-y-1">
-                                                        <p className="text-sm font-medium leading-none">{notification.title}</p>
-                                                        <p className="text-sm text-muted-foreground">{notification.description}</p>
-                                                        <p className="text-xs text-muted-foreground">{notification.time}</p>
+                                        <ScrollArea className="h-[250px]">
+                                            <div className="divide-y">
+                                                {notifications.map((notification) => (
+                                                    <div key={notification.id} className="flex items-start gap-2 p-3 hover:bg-gray-50">
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage src={notification.avatar || "/placeholder.svg?height=40&width=40"} />
+                                                            <AvatarFallback>{notification.title[0]}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="flex-1 space-y-1">
+                                                            <p className="text-sm font-medium text-black">{notification.title}</p>
+                                                            <p className="text-sm text-gray-600 line-clamp-2">{notification.description}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
                                     </Card>
                                 </PopoverContent>
                             </Popover>
-
-                            {/* Logout Button (Mobile/Tablet) */}
-                            <Button
+                             {/* Logout Button (Mobile/Tablet) */}
+                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={onLogout}
@@ -207,6 +232,19 @@ const Navbar = ({ pageTitle, onLogout }) => {
                             </Button>
                         </div>
                     </div>
+                    
+                    {/* Search Icon for Mobile */}
+                    {/* <div className="relative w-full">
+                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            className="pl-10 w-full px-3 py-2 border rounded"
+                            placeholder="Search..."
+                            type="search"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            aria-label="Search"
+                        />
+                    </div> */}
                 </div>
             </div>
         </header>

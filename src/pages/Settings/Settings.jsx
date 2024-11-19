@@ -205,7 +205,7 @@ const Settings = () => {
             {/* Avatar and Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={profileData.profileImage} alt="Profile picture" />
+                <AvatarImage src={profileData.profileImage} alt="Profile picture" className="object-cover" />
                 <AvatarFallback>
                   {profileData.firstName?.[0] || ''}{profileData.lastName?.[0] || ''}
                 </AvatarFallback>
