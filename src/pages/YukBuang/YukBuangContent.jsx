@@ -3,8 +3,9 @@ import DataTable from '../../component/common/DataTable';
 import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
 import { X } from 'lucide-react';
+import { format } from 'date-fns';
+import Swal from 'sweetalert2';
 
-// Dummy image URLs dengan placeholder yang valid
 const dummyImages = {
   'sampah4.jpg': 'https://picsum.photos/400/300?random=4',
   'sampah5.jpg': 'https://picsum.photos/400/300?random=5',
@@ -15,14 +16,8 @@ const ImagePreviewModal = ({ isOpen, onClose, imageUrl }) => {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div 
-        className="relative bg-white rounded-lg max-w-3xl max-h-[90vh] overflow-hidden"
-        onClick={e => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+      <div className="relative bg-white rounded-lg max-w-3xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClose}
           className="absolute right-2 top-2 p-1 rounded-full bg-white shadow-lg hover:bg-gray-100"
@@ -39,42 +34,6 @@ const ImagePreviewModal = ({ isOpen, onClose, imageUrl }) => {
   );
 };
 
-const initialData = [
-  {
-    id: "YP-20241027-0001",
-    name: "Agus Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    type: "Alumunium",
-    amount: "30 Kg",
-    photo: "sampah4.jpg",
-    status: "Berhasil"
-  },
-  {
-    id: "YP-20241027-0002",
-    name: "Kepin Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    type: "Alumunium",
-    amount: "30 Kg",
-    photo: "sampah5.jpg",
-    status: "Berhasil"
-  },
-  {
-    id: "YP-20241027-0003",
-    name: "Ega Santoso",
-    location: "Jl Melati No. 12 Komplek",
-    date: "Oct 27, 2024",
-    time: "08:00",
-    type: "Alumunium",
-    amount: "30 Kg",
-    photo: "sampah6.jpg",
-    status: "Berhasil"
-  },
-];
-
 const SearchBar = ({ onSearch }) => {
   const [searchText, setSearchText] = useState('');
   const [searchField, setSearchField] = useState('all');
@@ -82,20 +41,8 @@ const SearchBar = ({ onSearch }) => {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchText(value);
-    
     const searchTerm = value.toLowerCase().trim();
-    
-    const filtered = initialData.filter(item => {
-      if (searchField === 'all') {
-        return Object.entries(item).some(([key, val]) => 
-          key !== 'photo' && val.toString().toLowerCase().includes(searchTerm)
-        );
-      } else {
-        return item[searchField].toString().toLowerCase().includes(searchTerm);
-      }
-    });
-    
-    onSearch(filtered);
+    onSearch(searchTerm, searchField);
   };
 
   return (
@@ -113,29 +60,15 @@ const SearchBar = ({ onSearch }) => {
         <select
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={searchField}
-          onChange={(e) => {
-            setSearchField(e.target.value);
-            // Trigger search with new field
-            const value = searchText;
-            const searchTerm = value.toLowerCase().trim();
-            const filtered = initialData.filter(item => {
-              if (e.target.value === 'all') {
-                return Object.entries(item).some(([key, val]) => 
-                  key !== 'photo' && val.toString().toLowerCase().includes(searchTerm)
-                );
-              } else {
-                return item[e.target.value].toString().toLowerCase().includes(searchTerm);
-              }
-            });
-            onSearch(filtered);
-          }}
+          onChange={(e) => setSearchField(e.target.value)}
         >
           <option value="all">Semua Field</option>
-          {Object.keys(initialData[0])
-            .filter(key => key !== 'photo')
-            .map(key => (
-              <option key={key} value={key}>{key}</option>
-            ))}
+          <option value="delivery_id">Delivery ID</option>
+          <option value="name">Nama</option>
+          <option value="location">Lokasi</option>
+          <option value="date">Tanggal & Jam</option>
+          <option value="type">Jenis</option>
+          <option value="amount">Jumlah(Kg)</option>
         </select>
       </div>
     </div>
@@ -143,35 +76,40 @@ const SearchBar = ({ onSearch }) => {
 };
 
 const YukBuangContent = () => {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const [filteredData, setFilteredData] = useState(data);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
   const columns = [
-    { key: 'id', label: 'Pickup ID' },
+    { key: 'delivery_id', label: 'Delivery ID' },
     { key: 'name', label: 'Nama' },
     { key: 'location', label: 'Lokasi' },
-    { key: 'date', label: 'Tanggal & Jam' },
+    {
+      key: 'date',
+      label: 'Tanggal & Jam',
+      render: (value, row) => {
+        const formattedDate = format(new Date(row.date), 'MMM dd, yyyy');
+        const formattedTime = row.time ? format(new Date(`1970-01-01T${row.time}Z`), 'HH:mm') : '';
+        return `${formattedDate} (${formattedTime})`;
+      }
+    },
     { key: 'type', label: 'Jenis' },
     { key: 'amount', label: 'Jumlah(Kg)' },
-    { 
-      key: 'photo', 
+    {
+      key: 'photo',
       label: 'Foto',
       render: (value) => (
         <div className="flex items-center space-x-2">
-          <img 
+          <img
             src={dummyImages[value]}
-            alt="Thumbnail" 
+            alt="Thumbnail"
             className="w-10 h-10 object-cover rounded cursor-pointer"
             onClick={() => handleImageClick(value)}
           />
-          <button
-            onClick={() => handleImageClick(value)}
-            className="text-blue-600 hover:text-blue-800 underline"
-          >
+          <button onClick={() => handleImageClick(value)} className="text-blue-600 hover:text-blue-800 underline">
             Lihat Foto
           </button>
         </div>
@@ -191,17 +129,28 @@ const YukBuangContent = () => {
     {
       title: 'Pickup Details',
       fields: [
+        { key: 'delivery_id', label: 'Delivery ID' },
         { key: 'type', label: 'Jenis' },
         { key: 'amount', label: 'Jumlah' },
-        { key: 'date', label: 'Waktu' },
-        { 
-          key: 'photo', 
+        {
+          key: 'date',
+          label: 'Tanggal & Jam',
+          render: (value, row) => {
+            const formattedDate = format(new Date(value), 'MMM dd, yyyy'); 
+            const formattedTime = row.time
+              ? format(new Date(`1970-01-01T${row.time}Z`), 'HH:mm') 
+              : 'N/A';
+            return `${formattedDate} (${formattedTime})`;
+          }
+        },
+        {
+          key: 'photo',
           label: 'Foto',
           render: (value) => (
             <div className="flex items-center space-x-2">
-              <img 
+              <img
                 src={dummyImages[value]}
-                alt="Thumbnail" 
+                alt="Thumbnail"
                 className="w-10 h-10 object-cover rounded cursor-pointer"
                 onClick={() => handleImageClick(value)}
               />
@@ -217,27 +166,25 @@ const YukBuangContent = () => {
       ]
     }
   ];
+  
+
 
   const handleImageClick = (imageUrl) => {
     setSelectedImage(imageUrl);
     setIsImageModalOpen(true);
   };
 
-  const handleSearch = (searchResults) => {
-    setFilteredData(searchResults);
-  };
-
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'Berhasil':
-        return 'bg-green-100 text-green-800';
-      case 'Gagal':
-        return 'bg-red-100 text-red-800';
-      case 'Proses':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleSearch = (searchTerm, searchField) => {
+    const filtered = data.filter((item) => {
+      if (searchField === 'all') {
+        return Object.entries(item).some(([key, val]) =>
+          key !== 'photo' && val.toString().toLowerCase().includes(searchTerm)
+        );
+      } else {
+        return item[searchField].toString().toLowerCase().includes(searchTerm);
+      }
+    });
+    setFilteredData(filtered);
   };
 
   const handleEdit = (rowData) => {
@@ -245,27 +192,97 @@ const YukBuangContent = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = data.filter(item => item.id !== id);
-      setData(newData);
-      setFilteredData(newData);
-    }
+  const handleUpdate = (updatedData) => {
+    fetch(`http://localhost:5000/api/yuk_buang/${updatedData.delivery_id}`, { 
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedData)
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        setData((prev) =>
+          prev.map((item) =>
+            item.delivery_id === updatedData.delivery_id ? updatedData : item
+          )
+        );
+        setFilteredData((prev) =>
+          prev.map((item) =>
+            item.delivery_id === updatedData.delivery_id ? updatedData : item
+          )
+        );
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data berhasil diupdate.',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+        });
+
+        setIsEditModalOpen(false);
+      })
+      .catch((error) => console.error('Error updating data:', error));
   };
 
-  const handleUpdate = (updatedData) => {
-    const newData = data.map(item =>
-      item.id === updatedData.id ? updatedData : item
-    );
-    setData(newData);
-    setFilteredData(newData);
-    setIsEditModalOpen(false);
-    setSelectedData(null);
+  const handleDelete = (deliveryId) => {
+    if (!deliveryId) {
+      console.error('delivery_id is undefined'); // Debug error
+      return;
+    }
+  
+    Swal.fire({
+      title: 'Yakin menghapus data ini?',
+      text: 'Data yang dihapus tidak dapat dikembalikan.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Hapus',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`http://localhost:5000/api/yuk_buang/${deliveryId}`, {
+          method: 'DELETE',
+        })
+          .then((response) => {
+            if (response.ok) {
+              setData((prev) => prev.filter((item) => item.delivery_id !== deliveryId));
+              setFilteredData((prev) => prev.filter((item) => item.delivery_id !== deliveryId));
+  
+              Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Data berhasil dihapus.',
+                confirmButtonColor: '#3085d6',
+              });
+            } else {
+              throw new Error('Gagal menghapus data');
+            }
+          })
+          .catch((error) => {
+            console.error('Error deleting data:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal!',
+              text: 'Terjadi kesalahan saat menghapus data.',
+              confirmButtonColor: '#d33',
+            });
+          });
+      }
+    });
   };
+  
+
 
   useEffect(() => {
-    setFilteredData(data);
-  }, [data]);
+    fetch('http://localhost:5000/api/yuk_buang')
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data);
+        setFilteredData(data);
+      })
+      .catch((error) => console.error('Error fetching data:', error));
+  }, []);
 
   return (
     <div>
@@ -280,44 +297,50 @@ const YukBuangContent = () => {
         data={filteredData}
         columns={columns}
         handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        getStatusBadgeClass={getStatusBadgeClass}
+        handleDelete={(deliveryId) => handleDelete(deliveryId)} 
+      />
+
+    <div className="lg:hidden space-y-4">
+      {filteredData.map((row) => (
+        <DataCard
+        key={row.delivery_id} 
+        data={row}
+        sections={cardSections}
+        handleEdit={handleEdit}
+        handleDelete={() => handleDelete(row.delivery_id)} 
         onImageClick={handleImageClick}
         imageUrlMap={dummyImages}
       />
 
-      <div className="lg:hidden space-y-4">
-        {filteredData.map((row) => (
-          <DataCard
-            key={row.id}
-            data={row}
-            sections={cardSections}
-            handleEdit={handleEdit}
-            handleDelete={() => handleDelete(row.id)}
-            onImageClick={handleImageClick}
-            imageUrlMap={dummyImages}
-          />
-        ))}
-      </div>
+      ))}
+    </div>
 
-      {selectedData && (
+      {isEditModalOpen && selectedData && (
         <EditModal
           isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedData(null);
-          }}
+          onClose={() => setIsEditModalOpen(false)}
           data={selectedData}
-          fields={columns.filter(col => col.key !== 'id')}
+          fields={[
+            { key: 'name', label: 'Nama', required: true },
+            { key: 'location', label: 'Lokasi', required: true },
+            { key: 'type', label: 'Jenis', required: true },
+            { key: 'amount', label: 'Jumlah(Kg)', required: true },
+            {
+              key: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: 'Berhasil', label: 'Berhasil' },
+                { value: 'Gagal', label: 'Gagal' },
+                { value: 'Proses', label: 'Proses' }
+              ]
+            }
+          ]}
           onUpdate={handleUpdate}
         />
       )}
 
-      <ImagePreviewModal
-        isOpen={isImageModalOpen}
-        onClose={() => setIsImageModalOpen(false)}
-        imageUrl={selectedImage}
-      />
+      <ImagePreviewModal isOpen={isImageModalOpen} onClose={() => setIsImageModalOpen(false)} imageUrl={selectedImage} />
 
       {filteredData.length === 0 && (
         <div className="text-center py-8">

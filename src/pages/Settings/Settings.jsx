@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import Swal from 'sweetalert2';
 import {
   Select,
   SelectContent,
@@ -63,7 +64,13 @@ const Settings = () => {
 
         if (response.ok) {
             const updatedData = await response.json();
-            alert('Profile updated successfully');
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: 'Data berhasil diupdate.',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'OK',
+            });
 
             const newProfileData = {
                 ...updatedData,
@@ -279,20 +286,23 @@ const handleDeleteImage = async () => {
                   accept="image/*"
                   onChange={handleImageChange}
                 />
+              <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
                 <Button
                   variant="outline"
-                  className="mr-2 bg-[#55B3A4] text-[#ffffff] border-[#55B3A4] hover:bg-[#55B3A4]/10"
+                  className="bg-[#55B3A4] text-[#ffffff] border-[#55B3A4] hover:bg-[#55B3A4]/10 w-36 h-10"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Change picture
                 </Button>
                 <Button
                   variant="outline"
-                  className="text-[#F64A4A] border-[#F64A4A] hover:bg-[#F64A4A]/10"
+                  className="text-[#F64A4A] border-[#F64A4A] hover:bg-[#F64A4A]/10 w-36 h-10"
                   onClick={handleDeleteImage}
                 >
                   Delete picture
                 </Button>
+              </div>
+
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

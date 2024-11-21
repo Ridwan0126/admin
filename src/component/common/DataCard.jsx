@@ -1,5 +1,6 @@
 import React from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, Upload } from 'lucide-react'; // Hapus import Eye
+import { format } from 'date-fns';
 
 const DataCard = ({ 
   data, 
@@ -8,7 +9,8 @@ const DataCard = ({
   handleDelete, 
   contentType = 'default', 
   onImageClick,
-  imageUrlMap 
+  imageUrlMap,
+  handleUploadReceipt 
 }) => {
   const getStatusBadgeClass = (status) => {
     if (contentType === 'users') {
@@ -41,6 +43,56 @@ const DataCard = ({
     return baseClasses;
   };
 
+  const renderFieldValue = (field, value, row) => {
+    if (field.render) {
+      // Gunakan fungsi render yang didefinisikan di cardSections
+      return field.render(value, row);
+    }
+    switch (field.key) {
+      case 'photo':
+        return (
+          <div className="flex items-center space-x-2">
+            <img 
+              src={imageUrlMap?.[value] || value}
+              alt="Thumbnail" 
+              className="w-10 h-10 object-cover rounded cursor-pointer"
+              onClick={() => onImageClick?.(value)}
+            />
+            <button
+              onClick={() => onImageClick?.(value)}
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Lihat Foto
+            </button>
+          </div>
+        );
+      case 'receipt':
+        if (value) {
+          return (
+            <div className="flex items-center space-x-2">
+              <img 
+                src={value}
+                alt="Receipt" 
+                className="w-10 h-10 object-cover rounded cursor-pointer"
+                onClick={() => onImageClick?.(value)}
+              />
+              <button
+                onClick={() => onImageClick?.(value)}
+                className="text-blue-600 hover:text-blue-800 underline text-sm"
+              >
+                Lihat Receipt
+              </button>
+            </div>
+          );
+        }
+        return <span className="text-gray-400 text-sm">No receipt</span>;
+      case 'role':
+        return <span className={getRoleBadgeClass(value)}>{value}</span>;
+      default:
+        return value;
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition-shadow duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
@@ -63,26 +115,14 @@ const DataCard = ({
                   <span className="text-gray-600 font-medium w-full sm:w-1/3">
                     {field.label}
                   </span>
-                  {field.key === 'photo' ? (
-                    <div className="flex items-center space-x-2">
-                      <img 
-                        src={imageUrlMap?.[data[field.key]] || data[field.key]}
-                        alt="Thumbnail" 
-                        className="w-10 h-10 object-cover rounded cursor-pointer"
-                        onClick={() => onImageClick?.(data[field.key])}
-                      />
-                      <button
-                        onClick={() => onImageClick?.(data[field.key])}
-                        className="text-blue-600 hover:text-blue-800 underline"
-                      >
-                        Lihat Foto
-                      </button>
-                    </div>
-                  ) : (
-                    <span className={field.key === 'role' ? getRoleBadgeClass(data[field.key]) : ''}>
-                      {data[field.key]}
-                    </span>
-                  )}
+                  {field.key === 'receipt' && data[field.key] ? (
+                    <img 
+                      src={data[field.key]}
+                      alt="Receipt" 
+                      className="w-10 h-10 object-cover rounded cursor-pointer"
+                      onClick={() => onImageClick?.(data[field.key])}
+                    />
+                  ) : renderFieldValue(field, data[field.key], data)}
                 </div>
               ))}
             </div>
@@ -97,6 +137,15 @@ const DataCard = ({
             <Edit2 className="w-4 h-4" />
             <span className="hidden sm:inline">Edit</span>
           </button>
+          {handleUploadReceipt && (
+            <button 
+              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-green-600 rounded-md hover:bg-green-50 transition-colors duration-200"
+              onClick={() => handleUploadReceipt(data.id)}
+            >
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">Upload</span>
+            </button>
+          )}
           <button 
             className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 transition-colors duration-200"
             onClick={() => handleDelete(data.id)}

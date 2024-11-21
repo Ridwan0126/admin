@@ -1,113 +1,125 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'default' }) => {
-  // State to store form data
-  const [formData, setFormData] = useState(data);
+const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
+  // State for form data and validation errors
+  const [formData, setFormData] = useState(data || {});
+  const [errors, setErrors] = useState({});
 
-  // Sync formData with new data when modal opens with updated data
+  // Sync formData with new data when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData(data || {}); // Set formData to the selected admin data or empty object if undefined
+      setFormData(data || {}); // Load the data into the form
+      setErrors({}); // Reset errors
     }
   }, [isOpen, data]);
 
-  // Generate status options based on content type
-  const getStatusOptions = () => {
-    if (contentType === 'users') {
-      return (
-        <>
-          <option value="Aktif">Aktif</option>
-          <option value="Nonaktif">Nonaktif</option>
-        </>
-      );
-    }
-    return (
-      <>
-        <option value="Berhasil">Berhasil</option>
-        <option value="Gagal">Gagal</option>
-        <option value="Proses">Proses</option>
-      </>
-    );
+  // Validate form data
+  const validate = () => {
+    const newErrors = {};
+    fields.forEach((field) => {
+      if (field.required && !formData[field.key]) {
+        newErrors[field.key] = `${field.label} is required.`;
+      }
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // Do not render if modal is closed
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validate()) {
+      onUpdate(formData); // Pass updated data to the parent
+      onClose(); // Close the modal
+    }
+  };
+
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md">
+      <div className="bg-white rounded-lg w-full max-w-md shadow-lg">
+        {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold">Edit Data</h2>
-          <button 
-            onClick={() => {
-              onClose();
-              setFormData({}); // Optionally reset formData when modal closes
-            }} 
+          <button
+            onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          onUpdate(formData);
-          onClose();
-        }} className="p-4 space-y-4">
-          {fields.map(field => (
+
+        {/* Modal Form */}
+        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {fields.map((field) => (
             <div key={field.key} className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor={field.key}
+                className="block text-sm font-medium text-gray-700"
+              >
                 {field.label}
               </label>
-              {field.key === 'status' ? (
+              {field.type === 'select' ? (
                 <select
+                  id={field.key}
                   name={field.key}
-                  value={formData[field.key] || ''} // Ensure controlled component
-                  onChange={(e) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      [e.target.name]: e.target.value
-                    }));
-                  }}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={formData[field.key] || ''}
+                  onChange={handleChange}
+                  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors[field.key] ? 'border-red-500' : ''
+                  }`}
                 >
-                  {getStatusOptions()}
+                  {field.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               ) : (
                 <input
-                  type="text"
+                  id={field.key}
+                  type={field.type || 'text'}
                   name={field.key}
-                  value={formData[field.key] || ''} // Ensure controlled component
-                  onChange={(e) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      [e.target.name]: e.target.value
-                    }));
-                  }}
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={formData[field.key] || ''}
+                  onChange={handleChange}
+                  placeholder={field.placeholder || ''}
+                  className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors[field.key] ? 'border-red-500' : ''
+                  }`}
                 />
+              )}
+              {/* Validation error message */}
+              {errors[field.key] && (
+                <p className="text-sm text-red-500">{errors[field.key]}</p>
               )}
             </div>
           ))}
 
+          {/* Modal Actions */}
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={() => {
-                onClose();
-                setFormData({}); // Reset form data when closing
-              }}
+              onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-customTeal rounded hover:bg-emerald-500 transition-colors duration-200"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
             >
-              Simpan
+              Save
             </button>
           </div>
         </form>

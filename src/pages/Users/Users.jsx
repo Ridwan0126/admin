@@ -4,6 +4,8 @@ import DataCard from '../../component/common/DataCard';
 import EditModal from '../../component/common/EditModal';
 import AddModal from './AddModal';
 import { PlusCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
+
 
 const UsersContent = () => {
   const [data, setData] = useState([]);
@@ -82,28 +84,56 @@ const UsersContent = () => {
   };
   
   const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus admin ini?')) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/user/admins/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
+    Swal.fire({
+      title: 'Yakin menghapus admin ini?',
+      text: 'Data yang dihapus tidak dapat dikembalikan!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Hapus',
+      cancelButtonText: 'Batal',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/user/admins/${id}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: 'Admin berhasil dihapus.',
+              confirmButtonColor: '#3085d6',
+            });
+  
+            setData((prev) => prev.filter((admin) => admin.id !== id));
+            setFilteredData((prev) => prev.filter((admin) => admin.id !== id));
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal!',
+              text: 'Gagal menghapus admin.',
+              confirmButtonColor: '#d33',
+            });
           }
-        });
-        
-        if (response.ok) {
-          alert('Admin berhasil dihapus');
-          setData(data.filter(admin => admin.id !== id));
-          setFilteredData(filteredData.filter(admin => admin.id !== id));
-        } else {
-          alert('Gagal menghapus admin');
+        } catch (error) {
+          console.error('Error deleting admin:', error);
+  
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Terjadi kesalahan saat menghapus admin.',
+            confirmButtonColor: '#d33',
+          });
         }
-      } catch (error) {
-        console.error('Error deleting admin:', error);
-        alert('Error deleting admin');
       }
-    }
+    });
   };
 
   const handleUpdate = async (updatedData) => {
@@ -138,7 +168,15 @@ const UsersContent = () => {
       setFilteredData(newData);
       setIsEditModalOpen(false);
       setSelectedData(null);
-      alert('Admin updated successfully');
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Data berhasil diupdate.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'OK',
+      });
+
     } catch (error) {
       console.error('Error updating admin:', error);
       alert('Error updating admin');
@@ -195,7 +233,21 @@ const UsersContent = () => {
             setSelectedData(null);
           }}
           data={selectedData}
-          fields={columns.filter(col => col.key !== 'id')}
+          fields={[
+            { key: 'name', label: 'Nama', required: true },
+            { key: 'email', label: 'Email', required: true },
+            { key: 'number', label: 'Nomor Telepon', required: true },
+            { key: 'address', label: 'Alamat', required: true },
+            {
+              key: 'status',
+              label: 'Status',
+              type: 'select',
+              options: [
+                { value: 'Aktif', label: 'Aktif' },
+                { value: 'Nonaktif', label: 'Nonaktif' },
+              ]
+            }
+          ]}
           onUpdate={handleUpdate}
           contentType='users'
         />
