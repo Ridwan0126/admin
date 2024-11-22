@@ -72,6 +72,34 @@ const SearchBar = ({ data, onSearch }) => {
   );
 };
 
+const ImagePreviewModal = ({ isOpen, onClose, imageUrl }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-white rounded-lg max-w-3xl max-h-[90vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute right-2 top-2 p-1 rounded-full bg-white shadow-lg hover:bg-gray-100"
+        >
+          ✕
+        </button>
+        <img
+          src={imageUrl}
+          alt="Preview"
+          className="max-h-[85vh] w-auto object-contain"
+        />
+      </div>
+    </div>
+  );
+};
+
 const KuyPointContent = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -98,25 +126,32 @@ const KuyPointContent = () => {
     {
       key: 'receipt',
       label: 'Receipt',
-      render: (value) =>
-        value ? (
-          <div className="flex items-center space-x-2">
-            <img
-              src={`http://localhost:5000/uploads/receipts/${value}`}
-              alt="Receipt"
-              className="w-10 h-10 object-cover rounded cursor-pointer"
-              onClick={() => handleImageClick(`http://localhost:5000/uploads/receipts/${value}`)}
-            />
-            <button
-              className="text-blue-600 underline hover:text-blue-800"
-              onClick={() => handleImageClick(`http://localhost:5000/uploads/receipts/${value}`)}
-            >
-              Lihat Foto
-            </button>
-          </div>
-        ) : (
-          <span className="text-gray-400 text-sm">No receipt</span>
-        ),
+      render: (value) => {
+        console.log("Receipt value:", value); // Debug value
+        if (!value || typeof value !== 'string') {
+            return <span className="text-gray-400 text-sm">No receipt available</span>;
+        }
+    
+        const fullUrl = `http://localhost:5000${value}`;
+        console.log("Full URL for <img>:", fullUrl); // Debug URL
+    
+        return (
+            <div className="flex items-center space-x-2">
+                <img
+                    src={fullUrl}
+                    alt="Receipt"
+                    className="w-10 h-10 object-cover rounded cursor-pointer"
+                    onClick={() => handleImageClick(fullUrl)}
+                />
+                <button
+                    className="text-blue-600 underline hover:text-blue-800"
+                    onClick={() => handleImageClick(fullUrl)}
+                >
+                    Lihat Foto
+                </button>
+            </div>
+        );
+    },      
     },
     { key: 'status', label: 'Status' },
   ];
@@ -133,49 +168,66 @@ const KuyPointContent = () => {
     {
       title: 'Pickup Details',
       fields: [
-        { key: 'id', label: 'ID Penukaran' },
         { key: 'point', label: 'Poin' },
         { key: 'give', label: 'Hadiah' },
-        { 
-          key: 'receipt', 
+        {
+          key: 'receipt',
           label: 'Receipt',
-          render: (value, row) => value && (
-            <div className="flex items-center gap-2">
-              <img 
-                src={value}
-                alt="Receipt" 
-                className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => handleImageClick(value)}
-              />
-              <button
-                onClick={() => handleDeleteReceipt(row.id)}
-                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
-                title="Hapus foto"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )
-        }
+          render: (value) => {
+            console.log("Receipt value in DataCard:", value); // Debug nilai receipt
+        
+            if (!value || typeof value !== 'string') {
+              return <span className="text-gray-400 text-sm">No receipt</span>;
+            }
+        
+            const fullUrl = `http://localhost:5000${value}`;
+            console.log("Full URL for <img> in DataCard:", fullUrl); // Debug URL gambar
+        
+            return (
+              <div className="flex items-center space-x-2">
+                <img
+                  src={fullUrl}
+                  alt="Receipt"
+                  className="w-10 h-10 object-cover rounded cursor-pointer"
+                  onClick={() => handleImageClick(fullUrl)}
+                />
+                <button
+                  className="text-blue-600 underline hover:text-blue-800"
+                  onClick={() => handleImageClick(fullUrl)}
+                >
+                  Lihat Foto
+                </button>
+              </div>
+            );
+          },
+        }       
       ]
     }
   ];
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await fetch(`${API_URL}/history`);
-        if (!response.ok) throw new Error('Failed to fetch data');
-        const result = await response.json();
-        setData(result);
-        setFilteredData(result);
-      } catch (error) {
-        console.error(error.message);
-      }
+        try {
+            const response = await fetch(`${API_URL}/history`);
+            const result = await response.json();
+            console.log("Fetched data:", result);
+
+            // Pastikan receipt adalah string path
+            const formattedData = result.map((item) => ({
+                ...item,
+                receipt: typeof item.receipt === 'object' ? item.receipt.receipt : item.receipt,
+            }));
+
+            setData(formattedData);
+            setFilteredData(formattedData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
     };
 
     fetchData();
-  }, []);
+}, []);
+
 
   const handleSearch = (searchResults) => {
     setFilteredData(searchResults);
@@ -212,16 +264,6 @@ const KuyPointContent = () => {
     };
 
     input.click();
-  };
-
-  const handleDeleteReceipt = (rowId) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
-      const newData = data.map((item) =>
-        item.id === rowId ? { ...item, receipt: null } : item
-      );
-      setData(newData);
-      setFilteredData(newData);
-    }
   };
 
   const handleDelete = async (row) => {

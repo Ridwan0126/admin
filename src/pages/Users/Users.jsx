@@ -76,6 +76,15 @@ const UsersContent = () => {
     const updatedData = [...data, newUser];
     setData(updatedData);
     setFilteredData(updatedData);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Admin berhasil ditambahkan.',
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'OK',
+    });
+
   };
 
   const handleEdit = (rowData) => {

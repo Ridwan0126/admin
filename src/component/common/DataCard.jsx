@@ -45,7 +45,6 @@ const DataCard = ({
 
   const renderFieldValue = (field, value, row) => {
     if (field.render) {
-      // Gunakan fungsi render yang didefinisikan di cardSections
       return field.render(value, row);
     }
     switch (field.key) {
@@ -98,7 +97,7 @@ const DataCard = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">ID:</span>
-          <span className="font-semibold">{data.id}</span>
+          <span className="font-semibold">{data.id} {data.delivery_id} {data.pickup_id}</span>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(data.status)}`}>
           {data.status}
