@@ -127,7 +127,7 @@ const KuyPointContent = () => {
       key: 'receipt',
       label: 'Receipt',
       render: (value) => {
-        console.log("Receipt value:", value); // Debug value
+        console.log("Receipt value:", value); 
         if (!value || typeof value !== 'string') {
             return <span className="text-gray-400 text-sm">No receipt available</span>;
         }
@@ -174,14 +174,14 @@ const KuyPointContent = () => {
           key: 'receipt',
           label: 'Receipt',
           render: (value) => {
-            console.log("Receipt value in DataCard:", value); // Debug nilai receipt
+            console.log("Receipt value in DataCard:", value); 
         
             if (!value || typeof value !== 'string') {
               return <span className="text-gray-400 text-sm">No receipt</span>;
             }
         
             const fullUrl = `http://localhost:5000${value}`;
-            console.log("Full URL for <img> in DataCard:", fullUrl); // Debug URL gambar
+            console.log("Full URL for <img> in DataCard:", fullUrl); 
         
             return (
               <div className="flex items-center space-x-2">
@@ -212,7 +212,6 @@ const KuyPointContent = () => {
             const result = await response.json();
             console.log("Fetched data:", result);
 
-            // Pastikan receipt adalah string path
             const formattedData = result.map((item) => ({
                 ...item,
                 receipt: typeof item.receipt === 'object' ? item.receipt.receipt : item.receipt,

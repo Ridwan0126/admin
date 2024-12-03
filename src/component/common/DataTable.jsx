@@ -12,10 +12,8 @@ const DataTable = ({
   renderActions,
   getStatusBadgeClassProp,
 }) => {
-  // Get the primary key for any row (handles multiple ID keys)
   const getPrimaryKey = (row) => row.pickup_id || row.delivery_id || row.id;
 
-  // Default function for determining badge classes
   const getDefaultStatusBadgeClass = (status) => {
     if (contentType === 'users') {
       switch (status?.toLowerCase()) {
@@ -49,7 +47,6 @@ const DataTable = ({
     return baseClasses;
   };
 
-  // Function to render cells dynamically
   const renderCell = (row, column) => {
     const cellValue = row[column.key];
 

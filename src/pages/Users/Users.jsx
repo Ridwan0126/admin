@@ -151,7 +151,6 @@ const UsersContent = () => {
       return alert('Error: No selected admin to update.');
     }
   
-    // Hilangkan `gender` dari data yang dikirim ke backend
     const dataToSend = { ...updatedData };
     delete dataToSend.gender;
   
