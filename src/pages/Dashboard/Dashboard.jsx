@@ -11,33 +11,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const transactions = [
-  {
-    name: "Budi Santoso",
-    email: "budi.s@example.com",
-    amount: "50.000",
-    type: "Pengantaran"
-  },
-  {
-    name: "Dewi Putri",
-    email: "dewi.p@example.com",
-    amount: "75.000",
-    type: "Penjemputan"
-  },
-  {
-    name: "Ahmad Rahman",
-    email: "ahmad.r@example.com",
-    amount: "100.000",
-    type: "Pengantaran"
-  },
-  {
-    name: "Siti Nurhaliza",
-    email: "siti.n@example.com",
-    amount: "65.000",
-    type: "Penjemputan"
-  }
-];
-
 // Search Bar Component
 const SearchBar = ({ onSearch, searchFields }) => {
   const [searchParams, setSearchParams] = useState({
@@ -96,6 +69,7 @@ const Dashboard = () => {
     totalPengguna: 0,
   });
   const [chartData, setChartData] = useState([]); // Menyimpan data untuk chart
+  const [transactions, setTransactions] = useState([]);
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -103,6 +77,16 @@ const Dashboard = () => {
       try {
         const response = await fetch("http://localhost:5000/api/dashboard/data");
         const result = await response.json();
+        console.log(result);
+
+        if (result.transactions && Array.isArray(result.transactions)) {
+          setTransactions(result.transactions);
+          setFilteredTransactions(result.transactions);  // Default: semua transaksi
+        } else {
+          setTransactions([]);
+          setFilteredTransactions([]);
+        }
+
         setData(result);  // Menyimpan data dari API
         if (result.overview) {
           setChartData(result.overview);  // Menyimpan data untuk chart
@@ -293,8 +277,18 @@ const Dashboard = () => {
             />
             
             <div className="space-y-4">
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((transaction, i) => (
+            {Array.isArray(filteredTransactions) && filteredTransactions.length > 0 ? (
+              filteredTransactions.map((transaction, i) => {
+                // Log untuk memastikan data transaction
+                console.log('Transaction Data:', transaction);
+
+                const amount = parseFloat(transaction.amount);
+                const pricePerKg = parseFloat(transaction.price_per_kg);
+
+                // Validasi jumlah dan harga per kg
+                const totalHarga = (isNaN(amount) || isNaN(pricePerKg)) ? 0 : amount * pricePerKg;
+
+                return (
                   <div key={i} className="flex items-center gap-3 pb-3 border-b last:border-0 last:pb-0">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={`/placeholder.svg?height=32&width=32`} alt="Avatar" />
@@ -306,16 +300,15 @@ const Dashboard = () => {
                       <p className="text-xs text-muted-foreground">{transaction.type}</p>
                     </div>
                     <div className="text-sm font-medium">
-                      Rp {transaction.amount}
+                      Rp {transaction.total_harga ? parseFloat(transaction.total_harga).toLocaleString('id-ID') : 0}
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-4 text-gray-500">
-                  Tidak ada transaksi yang ditemukan
-                </div>
-              )}
-            </div>
+                );
+              })
+            ) : (
+              <p>Tidak ada transaksi terbaru.</p>
+            )}
+          </div>
           </CardContent>
         </Card>
       </div>

@@ -171,12 +171,16 @@ const UsersContent = () => {
       }
   
       const updatedAdmin = await response.json();
-      const newData = data.map(item => (item.id === selectedData.id ? { ...item, ...updatedAdmin } : item));
-      setData(newData);
-      setFilteredData(newData);
+  
+      // Update state with the new data, ensuring role change is reflected
+      const updatedData = data.map(item => item.id === selectedData.id ? { ...item, ...updatedAdmin } : item);
+      setData(updatedData);  // Update the main data state
+      setFilteredData(updatedData);  // Ensure the updated data is included in the filtered data
+  
+      // Close the modal
       setIsEditModalOpen(false);
       setSelectedData(null);
-
+  
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
@@ -184,12 +188,12 @@ const UsersContent = () => {
         confirmButtonColor: '#3085d6',
         confirmButtonText: 'OK',
       });
-
+  
     } catch (error) {
       console.error('Error updating admin:', error);
       alert('Error updating admin');
     }
-  };
+  };  
 
   return (
     <div>
