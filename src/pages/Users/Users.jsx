@@ -6,7 +6,6 @@ import AddModal from './AddModal';
 import { PlusCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-
 const UsersContent = () => {
   const [data, setData] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,9 +36,9 @@ const UsersContent = () => {
   ];
 
   useEffect(() => {
-    const fetchAdmins = async () => {
+    const fetchUsers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/user/admins', {
+        const response = await fetch('http://localhost:5000/api/user/users', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -47,14 +46,16 @@ const UsersContent = () => {
           },
         });
         if (!response.ok) throw new Error('Failed to fetch admins');
-        const admins = await response.json();
-        setData(admins);
-        setFilteredData(admins);
+        const users = await response.json();
+        console.log('Fetched users:', users); // Log the fetched users
+        setData(users);
+        setFilteredData(users);
       } catch (error) {
         console.error('Error fetching admins:', error);
       }
     };
-    fetchAdmins();
+    
+    fetchUsers();
   }, []);
 
   const handleSearch = (searchResults) => {
@@ -84,7 +85,6 @@ const UsersContent = () => {
       confirmButtonColor: '#3085d6',
       confirmButtonText: 'OK',
     });
-
   };
 
   const handleEdit = (rowData) => {
@@ -105,7 +105,7 @@ const UsersContent = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`http://localhost:5000/api/user/admins/${id}`, {
+          const response = await fetch(`http://localhost:5000/api/user/users/${id}`, {
             method: 'DELETE',
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -155,7 +155,7 @@ const UsersContent = () => {
     delete dataToSend.gender;
   
     try {
-      const response = await fetch(`http://localhost:5000/api/user/admins/${selectedData.id}`, {
+      const response = await fetch(`http://localhost:5000/api/user/users/${selectedData.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -172,12 +172,10 @@ const UsersContent = () => {
   
       const updatedAdmin = await response.json();
   
-      // Update state with the new data, ensuring role change is reflected
-      const updatedData = data.map(item => item.id === selectedData.id ? { ...item, ...updatedAdmin } : item);
-      setData(updatedData);  // Update the main data state
-      setFilteredData(updatedData);  // Ensure the updated data is included in the filtered data
+      const updatedDataList = data.map(item => item.id === selectedData.id ? { ...item, ...updatedAdmin } : item);
+      setData(updatedDataList);
+      setFilteredData(updatedDataList);
   
-      // Close the modal
       setIsEditModalOpen(false);
       setSelectedData(null);
   
@@ -193,7 +191,7 @@ const UsersContent = () => {
       console.error('Error updating admin:', error);
       alert('Error updating admin');
     }
-  };  
+  };
 
   return (
     <div>
