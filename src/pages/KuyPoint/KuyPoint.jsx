@@ -175,21 +175,22 @@ const KuyPointContent = () => {
           label: 'Receipt',
           render: (value) => {
             console.log("Receipt value in DataCard:", value); 
-        
+            
             if (!value || typeof value !== 'string') {
               return <span className="text-gray-400 text-sm">No receipt</span>;
             }
-        
+            
             const fullUrl = `http://localhost:5000${value}`;
             console.log("Full URL for <img> in DataCard:", fullUrl); 
-        
+  
             return (
               <div className="flex items-center space-x-2">
                 <img
                   src={fullUrl}
                   alt="Receipt"
-                  className="w-10 h-10 object-cover rounded cursor-pointer"
+                  className="w-20 h-20 object-cover rounded cursor-pointer"
                   onClick={() => handleImageClick(fullUrl)}
+                  onError={(e) => e.target.src = 'path/to/fallback-image.jpg'}  // Tambahkan fallback image jika gambar gagal
                 />
                 <button
                   className="text-blue-600 underline hover:text-blue-800"
@@ -199,8 +200,8 @@ const KuyPointContent = () => {
                 </button>
               </div>
             );
-          },
-        }       
+          }
+        }
       ]
     }
   ];

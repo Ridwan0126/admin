@@ -131,7 +131,7 @@ const YukBuangContent = () => {
       fields: [
         { key: 'delivery_id', label: 'Delivery ID' },
         { key: 'type', label: 'Jenis' },
-        { key: 'amount', label: 'Jumlah' },
+        { key: 'amount', label: 'Jumlah (Kg)' },
         {
           key: 'date',
           label: 'Tanggal & Jam',

@@ -134,7 +134,7 @@ const YukAngkutContent = () => {
       fields: [
         { key: 'pickup_id', label: 'Pickup ID' },
         { key: 'type', label: 'Jenis' },
-        { key: 'amount', label: 'Jumlah' },
+        { key: 'amount', label: 'Jumlah (Kg)' },
         {
           key: 'date',
           label: 'Tanggal & Jam',

@@ -26,10 +26,19 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
-        navigate('/dashboard');
-    } else {
+        // Cek role pengguna setelah login berhasil
+        if (data.user.role === 'Admin') {
+          // Jika role adalah Admin, simpan data user dan token di localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('token', data.token);
+
+          // Arahkan ke dashboard
+          navigate('/dashboard');
+        } else {
+          // Jika bukan Admin, tampilkan error
+          setError('You do not have admin privileges');
+        }
+      } else {
         setError(data.message || 'Login failed');
       }
     } catch (error) {
