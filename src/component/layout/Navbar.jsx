@@ -6,13 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-const messages = [
-  { id: 1, user: "@Budimulyono", avatar: "/placeholder.svg?height=32&width=32", message: "Permintaan baru! Pengguna budi telah meminta penjemputan sampah pada 12 November", time: "2m ago" },
-  { id: 2, user: "@Setiawan", avatar: "/placeholder.svg?height=32&width=32", message: "Permintaan baru! Pengguna budi telah meminta penjemputan sampah pada 11 November", time: "5m ago" },
-  { id: 3, user: "@Joniman", avatar: "/placeholder.svg?height=32&width=32", message: "Permintaan baru! Pengguna budi telah meminta penjemputan sampah pada 10 November", time: "10m ago" },
-  { id: 4, user: "@Yantopasarb", avatar: "/placeholder.svg?height=32&width=32", message: "Permintaan baru! Pengguna budi telah meminta penjemputan sampah pada 11 November", time: "15m ago" }
-];
+import axios from 'axios';
 
 const notifications = [
   { id: 1, title: "Permintaan Baru", description: "Ada 3 permintaan penjemputan sampah baru", time: "Baru saja" },
@@ -24,10 +18,10 @@ const Navbar = ({ pageTitle, onLogout }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [userProfile, setUserProfile] = useState(null);
     const [messages, setMessages] = useState([]);
+    const [unreadMessages, setUnreadMessages] = useState(0);  // To track unread messages
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Fetch user profile from localStorage (or backend API if needed)
     useEffect(() => {
         const fetchUserProfile = () => {
             const storedUserProfile = JSON.parse(localStorage.getItem('userProfile'));
@@ -43,23 +37,42 @@ const Navbar = ({ pageTitle, onLogout }) => {
     }, []);
 
     useEffect(() => {
-        const fetchMessages = async () => {
+        const fetchMessagesForAdmin = async () => {
             try {
-                const response = await axios.get('/api/message'); // Ganti dengan API endpoint yang sesuai
-                setMessages(response.data);
+                const response = await axios.get('http://localhost:5000/api/message/admin/messages');
+                console.log("Response from API:", response.data); // Log response for debugging
+                if (Array.isArray(response.data)) {
+                    setMessages(response.data);
+                    setUnreadMessages(response.data.filter(message => !message.isRead).length); // Count unread messages
+                } else {
+                    console.warn("Data is not an array:", response.data); // Handle non-array data
+                    setMessages([]); // Reset messages
+                    setUnreadMessages(0); // Reset unread count
+                }
             } catch (error) {
-                console.error("Error fetching messages:", error);
+                console.error("Error fetching messages for admin:", error);
+                setMessages([]);
+                setUnreadMessages(0); // Reset unread count on error
             }
         };
-        fetchMessages();
+        fetchMessagesForAdmin();
     }, []);
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
 
+    const handleMarkAsRead = (messageId) => {
+        setMessages(prevMessages =>
+            prevMessages.map(message =>
+                message.id === messageId ? { ...message, isRead: true } : message
+            )
+        );
+        setUnreadMessages(prevUnread => prevUnread - 1);
+    };
+
     if (!userProfile) {
-        return <div>Loading...</div>; // Handle loading state if needed
+        return <div>Loading...</div>;
     }
 
     const fullName = `${userProfile.firstName} ${userProfile.lastName}`;
@@ -79,11 +92,15 @@ const Navbar = ({ pageTitle, onLogout }) => {
                             <PopoverTrigger asChild>
                                 <Button variant="ghost" size="icon" className="relative">
                                     <Mail className="h-5 w-5" />
-                                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                        {messages.length}
-                                    </span>
+                                    {/* Show unread message count */}
+                                    {unreadMessages > 0 && (
+                                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
+                                            {unreadMessages}
+                                        </span>
+                                    )}
                                 </Button>
                             </PopoverTrigger>
+
                             <PopoverContent className="w-[400px] p-0" align="end">
                                 <Card className="shadow-lg">
                                     <div className="p-4 border-b">
@@ -91,24 +108,36 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                     </div>
                                     <ScrollArea className="h-[400px]">
                                         <div className="divide-y">
-                                            {messages.map((message) => (
-                                                <div key={message.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
-                                                    <Avatar className="h-10 w-10">
-                                                        <AvatarImage src={message.avatar} />
-                                                        <AvatarFallback>{message.user[1]}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex-1 space-y-1">
-                                                        <p className="text-sm font-medium text-black">{message.user}</p>
-                                                        <p className="text-sm text-gray-600">{message.message}</p>
+                                            {/* If no messages */}
+                                            {messages.length === 0 ? (
+                                                <div className="p-4 text-center text-gray-600">Tidak ada pesan baru</div>
+                                            ) : (
+                                                messages.map((message) => (
+                                                    <div key={message.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
+                                                        <Avatar className="h-10 w-10">
+                                                            <AvatarImage src={message.avatar || "/default-avatar.png"} />
+                                                            <AvatarFallback>{message.sender_name[0]}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="flex-1 space-y-1">
+                                                            <p className="text-sm font-medium text-black">
+                                                                {message.sender_name}  {/* Display sender's name */}
+                                                            </p>
+                                                            <p className="text-sm text-gray-600">{message.message}</p>
+                                                            {/* Mark as read on click */}
+                                                            {!message.isRead && (
+                                                                <Button onClick={() => handleMarkAsRead(message.id)} size="small" variant="outline">
+                                                                    Tandai sebagai Dibaca
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))
+                                            )}
                                         </div>
                                     </ScrollArea>
                                 </Card>
                             </PopoverContent>
                         </Popover>
-
                         {/* Notifications Popover */}
                         <Popover>
                             <PopoverTrigger asChild>
@@ -178,30 +207,44 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                 <PopoverTrigger asChild>
                                     <Button variant="ghost" size="icon" className="relative">
                                         <Mail className="h-5 w-5" />
-                                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                            {messages.length}
-                                        </span>
+                                        {unreadMessages > 0 && (
+                                            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
+                                                {unreadMessages}
+                                            </span>
+                                        )}
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-screen max-w-[235px] p-0 " align="end" alignOffset={-8} sideOffset={8}>
+
+                                <PopoverContent className="w-[350px] p-0" align="end">
                                     <Card className="shadow-lg">
                                         <div className="p-4 border-b">
                                             <h2 className="text-lg font-semibold">Pesan</h2>
                                         </div>
-                                        <ScrollArea className="h-[370px]">
+                                        <ScrollArea className="h-[350px]">
                                             <div className="divide-y">
-                                                {messages.map((message) => (
-                                                    <div key={message.id} className="flex items-start gap-2 p-3 hover:bg-gray-50">
-                                                        <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={message.avatar} />
-                                                            <AvatarFallback>{message.user[1]}</AvatarFallback>
-                                                        </Avatar>
-                                                        <div className="flex-1 space-y-1">
-                                                            <p className="text-sm font-medium text-black">{message.user}</p>
-                                                            <p className="text-sm text-gray-600 line-clamp-2">{message.message}</p>
+                                                {messages.length === 0 ? (
+                                                    <div className="p-4 text-center text-gray-600">Tidak ada pesan baru</div>
+                                                ) : (
+                                                    messages.map((message) => (
+                                                        <div key={message.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
+                                                            <Avatar className="h-10 w-10">
+                                                                <AvatarImage src={message.avatar || "/default-avatar.png"} />
+                                                                <AvatarFallback>{message.sender_name[0]}</AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex-1 space-y-1">
+                                                                <p className="text-sm font-medium text-black">
+                                                                    {message.sender_name}
+                                                                </p>
+                                                                <p className="text-sm text-gray-600">{message.message}</p>
+                                                                {!message.isRead && (
+                                                                    <Button onClick={() => handleMarkAsRead(message.id)} size="small" variant="outline">
+                                                                        Tandai sebagai Dibaca
+                                                                    </Button>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    ))
+                                                )}
                                             </div>
                                         </ScrollArea>
                                     </Card>
@@ -218,22 +261,23 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                         </span>
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-screen max-w-[290px] p-0" align="end" alignOffset={-8} sideOffset={8}>
+
+                                <PopoverContent className="w-[350px] p-0" align="end">
                                     <Card className="shadow-lg">
                                         <div className="p-4 border-b">
-                                            <h2 className="text-lg font-semibold">Notifications</h2>
+                                            <h2 className="text-lg font-semibold">Notifikasi</h2>
                                         </div>
-                                        <ScrollArea className="h-[250px]">
+                                        <ScrollArea className="h-[350px]">
                                             <div className="divide-y">
                                                 {notifications.map((notification) => (
-                                                    <div key={notification.id} className="flex items-start gap-2 p-3 hover:bg-gray-50">
-                                                        <Avatar className="h-8 w-8">
+                                                    <div key={notification.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
+                                                        <Avatar className="h-10 w-10">
                                                             <AvatarImage src={notification.avatar || "/placeholder.svg?height=40&width=40"} />
                                                             <AvatarFallback>{notification.title[0]}</AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex-1 space-y-1">
                                                             <p className="text-sm font-medium text-black">{notification.title}</p>
-                                                            <p className="text-sm text-gray-600 line-clamp-2">{notification.description}</p>
+                                                            <p className="text-sm text-gray-600">{notification.description}</p>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -242,19 +286,8 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                     </Card>
                                 </PopoverContent>
                             </Popover>
-
-                            {/* Logout Button (Mobile/Tablet) */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onLogout}
-                                className="lg:hidden"
-                            >
-                                <LogOut className="h-5 w-5 text-red-600" />
-                            </Button>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </header>

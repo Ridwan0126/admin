@@ -94,10 +94,10 @@ const YukAngkutContent = () => {
       label: 'Tanggal & Jam',
       render: (value, row) => {
         const formattedDate = format(new Date(row.date), 'MMM dd, yyyy');
-        const formattedTime = row.time ? format(new Date(`1970-01-01T${row.time}Z`), 'HH:mm') : '';
+        const formattedTime = row.time ? row.time.slice(0, 5) : ''; 
         return `${formattedDate} (${formattedTime})`;
       }
-    },
+    },     
     { key: 'type', label: 'Jenis' },
     { key: 'amount', label: 'Jumlah(Kg)' },
     {
@@ -139,13 +139,11 @@ const YukAngkutContent = () => {
           key: 'date',
           label: 'Tanggal & Jam',
           render: (value, row) => {
-            const formattedDate = format(new Date(value), 'MMM dd, yyyy');
-            const formattedTime = row.time
-              ? format(new Date(`1970-01-01T${row.time}Z`), 'HH:mm')
-              : 'N/A';
+            const formattedDate = format(new Date(row.date), 'MMM dd, yyyy');
+            const formattedTime = row.time ? row.time.slice(0, 5) : ''; 
             return `${formattedDate} (${formattedTime})`;
           }
-        },
+        },   
         {
           key: 'photo',
           label: 'Foto',
