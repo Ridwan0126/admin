@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2, Upload } from 'lucide-react'; // Hapus import Eye
+import { Edit2, Trash2, Upload } from 'lucide-react';
 
 const DataTable = ({ 
   data, 
@@ -20,6 +20,18 @@ const DataTable = ({
           return 'bg-green-100 text-green-800';
         case 'nonaktif':
           return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+    if (contentType === 'blogs') {
+      switch (status) {
+        case 'Dipublikasikan':
+          return 'bg-green-100 text-green-800';
+        case 'Draft':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'Arsip':
+          return 'bg-gray-100 text-gray-800';
         default:
           return 'bg-gray-100 text-gray-800';
       }
@@ -50,13 +62,23 @@ const DataTable = ({
   const renderCell = (row, column) => {
     switch (column.key) {
       case 'photo':
+      case 'banner':
         return (
           <div className="flex items-center space-x-2">
             <img 
-              src={imageUrlMap?.[row[column.key]] || row[column.key]}
+              src={
+                imageUrlMap?.[row[column.key]] || 
+                (row[column.key] instanceof File 
+                  ? URL.createObjectURL(row[column.key]) 
+                  : row[column.key])
+              }
               alt="Thumbnail" 
               className="w-10 h-10 object-cover rounded cursor-pointer"
-              onClick={() => onImageClick?.(row[column.key])}
+              onClick={() => onImageClick?.(
+                row[column.key] instanceof File 
+                  ? URL.createObjectURL(row[column.key]) 
+                  : row[column.key]
+              )}
             />
           </div>
         );

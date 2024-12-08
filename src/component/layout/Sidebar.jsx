@@ -1,6 +1,6 @@
 import React from 'react';
 import LogoPilah from '../../assets/LogoPilah.svg';
-import { LayoutDashboard, Truck, TrendingUp, Wallet, Users, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Truck, TrendingUp, Wallet, Users, BookOpen, Settings, LogOut } from 'lucide-react';
 
 const Sidebar = ({ activeItem, setActiveItem, onLogout }) => {
   const sidebarItems = [
@@ -9,6 +9,7 @@ const Sidebar = ({ activeItem, setActiveItem, onLogout }) => {
     { icon: TrendingUp, text: 'Yuk Buang' },
     { icon: Wallet, text: 'Kuy Point' },
     { icon: Users, text: 'Users' },
+    { icon: BookOpen, text: 'Blog' },
     { icon: Settings, text: 'Settings' }
   ];
 

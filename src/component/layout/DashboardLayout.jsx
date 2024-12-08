@@ -32,6 +32,8 @@ const DashboardLayout = ({ children }) => {
         return 'Kuy Point';
       case '/users':
         return 'Users';
+      case '/blog':
+        return 'Blog';
       case '/settings':
         return 'Settings';
       default:
@@ -47,6 +49,7 @@ const DashboardLayout = ({ children }) => {
       'Yuk Buang': '/yuk-buang',
       'Kuy Point': '/kuy-point',
       'Users': '/users',
+      'Blog': '/blog',
       'Settings': '/settings'
     };
 

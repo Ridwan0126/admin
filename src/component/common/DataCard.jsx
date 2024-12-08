@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2, Upload } from 'lucide-react'; // Hapus import Eye
+import { Edit2, Trash2, Upload } from 'lucide-react';
 
 const DataCard = ({ 
   data, 
@@ -18,6 +18,18 @@ const DataCard = ({
           return 'bg-green-100 text-green-800';
         case 'nonaktif':
           return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+    if (contentType === 'blogs') {
+      switch (status) {
+        case 'Dipublikasikan':
+          return 'bg-green-100 text-green-800';
+        case 'Draft':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'Arsip':
+          return 'bg-gray-100 text-gray-800';
         default:
           return 'bg-gray-100 text-gray-800';
       }
@@ -45,16 +57,30 @@ const DataCard = ({
   const renderFieldValue = (field, value) => {
     switch (field.key) {
       case 'photo':
+      case 'banner':
         return (
           <div className="flex items-center space-x-2">
             <img 
-              src={imageUrlMap?.[value] || value}
+              src={
+                imageUrlMap?.[value] || 
+                (value instanceof File 
+                  ? URL.createObjectURL(value) 
+                  : value)
+              }
               alt="Thumbnail" 
               className="w-10 h-10 object-cover rounded cursor-pointer"
-              onClick={() => onImageClick?.(value)}
+              onClick={() => onImageClick?.(
+                value instanceof File 
+                  ? URL.createObjectURL(value) 
+                  : value
+              )}
             />
             <button
-              onClick={() => onImageClick?.(value)}
+              onClick={() => onImageClick?.(
+                value instanceof File 
+                  ? URL.createObjectURL(value) 
+                  : value
+              )}
               className="text-blue-600 hover:text-blue-800 underline"
             >
               Lihat Foto
