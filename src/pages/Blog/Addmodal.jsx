@@ -4,10 +4,11 @@ import { X, Upload } from 'lucide-react';
 const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
   const [formData, setFormData] = useState({
     judul: '',
+    isiBlog: '',
     penulis: '',
     tanggalPublikasi: '',
     banner: null,
-    status: 'Dipublikasikan' // Default and only status
+    status: 'Dipublikasikan'
   });
   const fileInputRef = useRef(null);
 
@@ -38,16 +39,18 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
     const newBlog = {
       id: Date.now().toString(),
       judul: formData.judul,
+      isiBlog: formData.isiBlog,
       penulis: formData.penulis,
       tanggalPublikasi: formData.tanggalPublikasi,
       banner: formData.banner ? formData.banner.file : null,
-      status: 'Dipublikasikan' // Always set to Dipublikasikan
+      status: 'Dipublikasikan'
     };
     onAdd(newBlog);
     onClose();
     // Reset form
     setFormData({
       judul: '',
+      isiBlog: '',
       penulis: '',
       tanggalPublikasi: '',
       banner: null,
@@ -93,6 +96,21 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
               placeholder="Masukkan judul blog"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Isi Blog
+            </label>
+            <textarea
+              name="isiBlog"
+              value={formData.isiBlog}
+              onChange={handleChange}
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+              placeholder="Masukkan isi blog"
+              rows={4}
             />
           </div>
 
@@ -192,3 +210,4 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
 };
 
 export default AddModal;
+
