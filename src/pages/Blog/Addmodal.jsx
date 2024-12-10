@@ -213,3 +213,4 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
 };
 
 export default AddModal;
+
