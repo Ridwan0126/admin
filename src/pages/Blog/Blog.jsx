@@ -10,6 +10,7 @@ const initialData = [
   {
     id: '1',
     judul: "Platform Digital Solusi Pengelolaan Sampah di Era Modern",
+    isiBlog: "Dalam era digital yang semakin berkembang, pengelolaan sampah dan limbah membutuhkan pendekatan yang lebih inovatif dan terintegrasi...",
     penulis: "Tim PilahYuk",
     tanggalPublikasi: "15 November 2024",
     banner: "banner.jpg",
@@ -88,6 +89,7 @@ const BlogContent = () => {
 
   const columns = [
     { key: 'judul', label: 'Judul' },
+    { key: 'isiBlog', label: 'Isi Blog' },
     { key: 'penulis', label: 'Penulis' },
     { key: 'tanggalPublikasi', label: 'Tanggal Publikasi' },
     { key: 'banner', label: 'Banner' },
@@ -99,6 +101,7 @@ const BlogContent = () => {
       title: 'Blog Details',
       fields: [
         { key: 'judul', label: 'Judul' },
+        { key: 'isiBlog', label: 'Isi Blog' },
         { key: 'penulis', label: 'Penulis' },
         { key: 'tanggalPublikasi', label: 'Tanggal Publikasi' },
         { key: 'banner', label: 'Banner' },

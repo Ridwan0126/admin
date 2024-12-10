@@ -202,7 +202,7 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate, contentType = 'def
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
+              className="px-4 py-2 text-sm font-medium text-white bg-customTeal rounded hover:bg-customTeal transition-colors duration-200"
             >
               Simpan
             </button>

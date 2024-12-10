@@ -4,10 +4,11 @@ import { X, Upload } from 'lucide-react';
 const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
   const [formData, setFormData] = useState({
     judul: '',
+    isiBlog: '',
     penulis: '',
     tanggalPublikasi: '',
     banner: null,
-    status: 'Dipublikasikan' // Default and only status
+    status: 'Dipublikasikan'
   });
   const fileInputRef = useRef(null);
 
@@ -38,16 +39,18 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
     const newBlog = {
       id: Date.now().toString(),
       judul: formData.judul,
+      isiBlog: formData.isiBlog,
       penulis: formData.penulis,
       tanggalPublikasi: formData.tanggalPublikasi,
       banner: formData.banner ? formData.banner.file : null,
-      status: 'Dipublikasikan' // Always set to Dipublikasikan
+      status: 'Dipublikasikan'
     };
     onAdd(newBlog);
     onClose();
     // Reset form
     setFormData({
       judul: '',
+      isiBlog: '',
       penulis: '',
       tanggalPublikasi: '',
       banner: null,
@@ -68,19 +71,22 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md">
-        <div className="flex justify-between items-center p-4 border-b">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
+      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col relative">
+        <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold">Tambah Blog Baru</h2>
           <button 
             onClick={onClose} 
-            className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
+            className="absolute right-4 top-4 p-1 hover:bg-gray-100 rounded transition-colors duration-200"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form 
+          onSubmit={handleSubmit} 
+          className="p-4 space-y-4 overflow-y-auto"
+        >
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Judul Blog
@@ -93,6 +99,21 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
               placeholder="Masukkan judul blog"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Isi Blog
+            </label>
+            <textarea
+              name="isiBlog"
+              value={formData.isiBlog}
+              onChange={handleChange}
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+              placeholder="Masukkan isi blog"
+              rows={4}
             />
           </div>
 
@@ -170,7 +191,7 @@ const AddModal = ({ isOpen, onClose, onAdd, onImageClick }) => {
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="sticky bottom-0 bg-white pt-4 pb-2 border-t flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
