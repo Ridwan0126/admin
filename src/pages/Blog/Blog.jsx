@@ -316,8 +316,7 @@ const BlogContent = () => {
   
 
   const handleUpdate = async (updatedData) => {
-    // Pastikan id berasal dari updatedData atau selectedData
-    const id = updatedData.id || selectedData?.id; // Ambil id dari updatedData atau selectedData
+    const id = updatedData.id || selectedData?.id;
   
     if (!id) {
       console.error("ID not found");
@@ -326,14 +325,12 @@ const BlogContent = () => {
   
     const formData = new FormData();
     
-    // Append regular fields to formData
     formData.append('judul', updatedData.judul);
     formData.append('isiBlog', updatedData.isiBlog);
     formData.append('penulis', updatedData.penulis);
     formData.append('tanggalPublikasi', updatedData.tanggalPublikasi);
     formData.append('status', updatedData.status);
   
-    // Append banner file if present
     if (updatedData.banner?.file) {
       formData.append('image', updatedData.banner.file);
     }
