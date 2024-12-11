@@ -36,10 +36,10 @@ const Settings = () => {
 
   useEffect(() => {
     if (userProfile) {
-        console.log("Data userProfile di frontend:", userProfile); // Debugging
+        console.log("Data userProfile di frontend:", userProfile); 
         setProfileData({
             ...userProfile,
-            profileImage: userProfile.profileImage || '/Avatar.svg' // Set default jika kosong
+            profileImage: userProfile.profileImage || '/Avatar.svg' 
         });
     }
 }, [userProfile]);
@@ -101,7 +101,7 @@ const handleImageChange = async (e) => {
               headers: {
                   'Authorization': `Bearer ${localStorage.getItem('token')}`,
               },
-              body: formData,  // Use FormData to send file
+              body: formData,  
           });
 
           if (response.ok) {
@@ -109,7 +109,7 @@ const handleImageChange = async (e) => {
               alert('Profile image uploaded successfully!');
               setUserProfile((prev) => ({
                   ...prev,
-                  profileImage: data.profileImage,  // Update the profileImage in the userProfile
+                  profileImage: data.profileImage,  
               }));
           } else {
               alert('Failed to upload profile image');
@@ -120,7 +120,6 @@ const handleImageChange = async (e) => {
   }
 };
 
-// Handle penghapusan gambar
 const handleDeleteImage = async () => {
   try {
     const response = await fetch('http://localhost:5000/api/user/profile/image', {
@@ -132,8 +131,7 @@ const handleDeleteImage = async () => {
 
     if (response.ok) {
       alert('Profile image deleted successfully');
-      
-      // Update the state to reflect the default image
+
       setProfileData((prev) => ({
         ...prev,
         profileImage: '/Avatar.svg'
@@ -245,10 +243,13 @@ const handleDeleteImage = async () => {
               type="button"
               variant="destructive"
               onClick={() => setIsEditDialogOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200"
             >
               Batal
             </Button>
-            <Button type="submit">
+            <Button type="submit"
+              className="flex items-center gap-2 px-4 py-2 bg-customTeal text-white rounded-md hover:bg-customTeal transition-colors duration-200"
+            >
               Simpan
             </Button>
           </div>
@@ -265,7 +266,7 @@ const handleDeleteImage = async () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-semibold">Profile picture</h2>
               <Button 
-                className="mr-2 bg-[#4182F9] hover:bg-[#3671e0] text-white"
+                className="mr-2 bg-[#55B3A4] text-[#ffffff] border-[#55B3A4] hover:bg-[#55B3A4]"
                 onClick={() => setIsEditDialogOpen(true)}
               >
                 Edit

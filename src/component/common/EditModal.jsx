@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
-  // State for form data and validation errors
   const [formData, setFormData] = useState(data || {});
   const [errors, setErrors] = useState({});
 
-  // Sync formData with new data when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData(data || {}); // Load the data into the form
-      setErrors({}); // Reset errors
+      setFormData(data || {}); 
+      setErrors({}); 
     }
   }, [isOpen, data]);
 
-  // Validate form data
   const validate = () => {
     const newErrors = {};
     fields.forEach((field) => {
@@ -26,29 +25,42 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      onUpdate(formData); // Pass updated data to the parent
-      onClose(); // Close the modal
+      onUpdate(formData); 
+      onClose(); 
     }
   };
 
-  // Handle input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileUrl = URL.createObjectURL(file); // Generate file preview
+      setFormData((prev) => ({
+        ...prev,
+        banner: {
+          file: file,
+          preview: fileUrl
+        }
+      }));
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md shadow-lg">
+      <div
+        className="bg-white rounded-lg shadow-lg w-full max-w-xl max-h-[90vh] overflow-y-auto"
+      >
         {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold">Edit Data</h2>
@@ -70,12 +82,20 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
               >
                 {field.label}
               </label>
-              {field.type === 'select' ? (
+              {field.type === 'quill' ? (
+                <ReactQuill
+                  value={formData[field.key] || ''}
+                  onChange={(value) => handleChange(field.key, value)}
+                  className={`border rounded focus:ring-2 focus:ring-blue-500 ${
+                    errors[field.key] ? 'border-red-500' : ''
+                  }`}
+                />
+              ) : field.type === 'select' ? (
                 <select
                   id={field.key}
                   name={field.key}
                   value={formData[field.key] || ''}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
                   className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors[field.key] ? 'border-red-500' : ''
                   }`}
@@ -86,13 +106,33 @@ const EditModal = ({ isOpen, onClose, data, fields, onUpdate }) => {
                     </option>
                   ))}
                 </select>
+              ) : field.type === 'file' ? (
+                <div>
+                  {/* Menampilkan preview gambar jika ada */}
+                  {formData.banner?.preview && (
+                    <div>
+                      <img
+                        src={formData.banner.preview}
+                        alt="Banner Preview"
+                        className="mb-2"
+                        width="100"
+                      />
+                    </div>
+                  )}
+                  {/* Input file untuk memilih gambar baru */}
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
               ) : (
                 <input
                   id={field.key}
                   type={field.type || 'text'}
                   name={field.key}
                   value={formData[field.key] || ''}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
                   placeholder={field.placeholder || ''}
                   className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors[field.key] ? 'border-red-500' : ''

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import KuyPoint from './pages/KuyPoint/KuyPoint';
 import Users from './pages/Users/Users';
 import Settings from './pages/Settings/Settings';
+import Blog from './pages/Blog/Blog';
 import LoginPage from './pages/LoginPage/LoginPage';
 import Navbar from './component/layout/Navbar';
 
@@ -39,6 +40,11 @@ const App = () => {
         <Route path="/users" element={
           <DashboardLayout>
             <Users />
+          </DashboardLayout>
+        } />
+        <Route path="/blog" element={
+          <DashboardLayout>
+            <Blog />
           </DashboardLayout>
         } />
         <Route path="/settings" element={

@@ -25,6 +25,14 @@ const DataTable = ({
           return 'bg-gray-100 text-gray-800';
       }
     }
+    if (contentType === 'blogs') {
+      switch (status?.toLowerCase()) {
+        case 'dipublikasikan':
+          return 'bg-green-100 text-green-800';
+        case 'draft':
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
     switch (status) {
       case 'Berhasil':
         return 'bg-green-100 text-green-800';

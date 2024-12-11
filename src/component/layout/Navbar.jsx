@@ -18,7 +18,6 @@ const Navbar = ({ pageTitle, onLogout }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [userProfile, setUserProfile] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [unreadMessages, setUnreadMessages] = useState(0);  // To track unread messages
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -40,42 +39,67 @@ const Navbar = ({ pageTitle, onLogout }) => {
         const fetchMessagesForAdmin = async () => {
             try {
                 const response = await axios.get('http://localhost:5000/api/message/admin/messages');
-                console.log("Response from API:", response.data); // Log response for debugging
+                console.log("Response from API:", response.data); 
                 if (Array.isArray(response.data)) {
                     setMessages(response.data);
-                    setUnreadMessages(response.data.filter(message => !message.isRead).length); // Count unread messages
                 } else {
-                    console.warn("Data is not an array:", response.data); // Handle non-array data
-                    setMessages([]); // Reset messages
-                    setUnreadMessages(0); // Reset unread count
+                    console.warn("Data is not an array:", response.data);
+                    setMessages([]); 
                 }
             } catch (error) {
                 console.error("Error fetching messages for admin:", error);
-                setMessages([]);
-                setUnreadMessages(0); // Reset unread count on error
+                setMessages([]); 
             }
         };
         fetchMessagesForAdmin();
     }, []);
 
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/notifications'); 
+                console.log("Response from API:", response.data);
+                if (Array.isArray(response.data)) {
+                    setNotifications(response.data); 
+                } else {
+                    console.warn("Data is not an array:", response.data);
+                    setNotifications([]);
+                }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+                setNotifications([]);
+            }
+        };
+    
+        fetchNotifications();
+    }, []);
+    
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
 
-    const handleMarkAsRead = (messageId) => {
-        setMessages(prevMessages =>
-            prevMessages.map(message =>
-                message.id === messageId ? { ...message, isRead: true } : message
-            )
-        );
-        setUnreadMessages(prevUnread => prevUnread - 1);
-    };
-
     if (!userProfile) {
-        return <div>Loading...</div>;
+        return <div>Loading...</div>; 
     }
 
     const fullName = `${userProfile.firstName} ${userProfile.lastName}`;
+
+    const handleMarkAsRead = async (messageId) => {
+        try {
+            const response = await axios.put(`http://localhost:5000/api/message/mark-as-read/${messageId}`);
+            if (response.status === 200) {
+                setMessages((prevMessages) =>
+                    prevMessages.map((message) =>
+                        message.id === messageId ? { ...message, status: 'read' } : message
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('Error marking message as read:', error);
+        }
+    };
+
+    const unreadMessagesCount = messages.filter(message => message.status === 'unread').length;
 
     return (
         <header className="bg-white shadow-sm sticky top-0 z-40">
@@ -92,10 +116,10 @@ const Navbar = ({ pageTitle, onLogout }) => {
                             <PopoverTrigger asChild>
                                 <Button variant="ghost" size="icon" className="relative">
                                     <Mail className="h-5 w-5" />
-                                    {/* Show unread message count */}
-                                    {unreadMessages > 0 && (
+                                    {/* Update jumlah pesan belum dibaca */}
+                                    {unreadMessagesCount > 0 && (
                                         <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                            {unreadMessages}
+                                            {unreadMessagesCount}
                                         </span>
                                     )}
                                 </Button>
@@ -108,7 +132,6 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                     </div>
                                     <ScrollArea className="h-[400px]">
                                         <div className="divide-y">
-                                            {/* If no messages */}
                                             {messages.length === 0 ? (
                                                 <div className="p-4 text-center text-gray-600">Tidak ada pesan baru</div>
                                             ) : (
@@ -119,13 +142,15 @@ const Navbar = ({ pageTitle, onLogout }) => {
                                                             <AvatarFallback>{message.sender_name[0]}</AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex-1 space-y-1">
-                                                            <p className="text-sm font-medium text-black">
-                                                                {message.sender_name}  {/* Display sender's name */}
-                                                            </p>
+                                                            <p className="text-sm font-medium text-black">{message.sender_name}</p>
                                                             <p className="text-sm text-gray-600">{message.message}</p>
-                                                            {/* Mark as read on click */}
-                                                            {!message.isRead && (
-                                                                <Button onClick={() => handleMarkAsRead(message.id)} size="small" variant="outline">
+                                                            {message.status === 'unread' && (
+                                                                <Button
+                                                                    onClick={() => handleMarkAsRead(message.id)}
+                                                                    size="small"
+                                                                    variant="outline"
+                                                                    className="mt-2"
+                                                                >
                                                                     Tandai sebagai Dibaca
                                                                 </Button>
                                                             )}
@@ -140,38 +165,44 @@ const Navbar = ({ pageTitle, onLogout }) => {
                         </Popover>
                         {/* Notifications Popover */}
                         <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="ghost" size="icon" className="relative">
-                                    <Bell className="h-5 w-5" />
-                                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                        {notifications.length}
-                                    </span>
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[400px] p-0" align="end">
-                                <Card className="shadow-lg">
-                                    <div className="p-4 border-b">
-                                        <h2 className="text-lg font-semibold">Notifications</h2>
-                                    </div>
-                                    <ScrollArea className="h-[400px]">
-                                        <div className="divide-y">
-                                            {notifications.map((notification) => (
+                        <PopoverTrigger asChild>
+                            <Button variant="ghost" size="icon" className="relative">
+                                <Bell className="h-5 w-5" />
+                                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
+                                    {notifications.length} {/* Menampilkan jumlah notifikasi */}
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-[400px] p-0" align="end">
+                            <Card className="shadow-lg">
+                                <div className="p-4 border-b">
+                                    <h2 className="text-lg font-semibold">Notifications</h2>
+                                </div>
+                                <ScrollArea className="h-[400px]">
+                                    <div className="divide-y">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-4 text-center text-gray-600">Tidak ada notifikasi baru</div>
+                                        ) : (
+                                            notifications.map((notification) => (
                                                 <div key={notification.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
                                                     <Avatar className="h-10 w-10">
-                                                        <AvatarImage src={notification.avatar || "/placeholder.svg?height=40&width=40"} />
+                                                        <AvatarImage src={notification.avatar || "/default-avatar.png"} />
                                                         <AvatarFallback>{notification.title[0]}</AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex-1 space-y-1">
                                                         <p className="text-sm font-medium text-black">{notification.title}</p>
                                                         <p className="text-sm text-gray-600">{notification.description}</p>
+                                                        <p className="text-xs text-gray-500">{notification.time}</p>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </Card>
-                            </PopoverContent>
-                        </Popover>
+                                            ))
+                                        )}
+                                    </div>
+                                </ScrollArea>
+                            </Card>
+                        </PopoverContent>
+                    </Popover>
 
                         <div className="flex items-center gap-3">
                             <div className="text-right">
@@ -202,92 +233,104 @@ const Navbar = ({ pageTitle, onLogout }) => {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            {/* Messages Popover (Mobile) */}
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="relative">
-                                        <Mail className="h-5 w-5" />
-                                        {unreadMessages > 0 && (
-                                            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                                {unreadMessages}
-                                            </span>
-                                        )}
-                                    </Button>
-                                </PopoverTrigger>
-
-                                <PopoverContent className="w-[350px] p-0" align="end">
-                                    <Card className="shadow-lg">
-                                        <div className="p-4 border-b">
-                                            <h2 className="text-lg font-semibold">Pesan</h2>
-                                        </div>
-                                        <ScrollArea className="h-[350px]">
-                                            <div className="divide-y">
-                                                {messages.length === 0 ? (
-                                                    <div className="p-4 text-center text-gray-600">Tidak ada pesan baru</div>
-                                                ) : (
-                                                    messages.map((message) => (
-                                                        <div key={message.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
-                                                            <Avatar className="h-10 w-10">
-                                                                <AvatarImage src={message.avatar || "/default-avatar.png"} />
-                                                                <AvatarFallback>{message.sender_name[0]}</AvatarFallback>
-                                                            </Avatar>
-                                                            <div className="flex-1 space-y-1">
-                                                                <p className="text-sm font-medium text-black">
-                                                                    {message.sender_name}
-                                                                </p>
-                                                                <p className="text-sm text-gray-600">{message.message}</p>
-                                                                {!message.isRead && (
-                                                                    <Button onClick={() => handleMarkAsRead(message.id)} size="small" variant="outline">
-                                                                        Tandai sebagai Dibaca
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </ScrollArea>
-                                    </Card>
-                                </PopoverContent>
-                            </Popover>
-
-                            {/* Notifications Popover (Mobile) */}
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="relative">
-                                        <Bell className="h-5 w-5" />
+                        {/* Mobile Messages Popover */}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="ghost" size="icon" className="relative">
+                                    <Mail className="h-5 w-5" />
+                                    {/* Update jumlah pesan belum dibaca */}
+                                    {unreadMessagesCount > 0 && (
                                         <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                                            {notifications.length}
+                                            {unreadMessagesCount}
                                         </span>
-                                    </Button>
-                                </PopoverTrigger>
-
-                                <PopoverContent className="w-[350px] p-0" align="end">
-                                    <Card className="shadow-lg">
-                                        <div className="p-4 border-b">
-                                            <h2 className="text-lg font-semibold">Notifikasi</h2>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-screen max-w-[235px] p-0" align="end" alignOffset={-8} sideOffset={8}>
+                                <Card className="shadow-lg">
+                                    <div className="p-4 border-b">
+                                        <h2 className="text-lg font-semibold">Pesan</h2>
+                                    </div>
+                                    <ScrollArea className="h-[370px]">
+                                        <div className="divide-y">
+                                            {messages.map((message) => (
+                                                <div key={message.id} className="flex items-start gap-2 p-3 hover:bg-gray-50">
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarImage src={message.avatar} />
+                                                        <AvatarFallback>{message.sender_name[0]}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1 space-y-1">
+                                                        <p className="text-sm font-medium text-black">{message.sender_name}</p>
+                                                        <p className="text-sm text-gray-600 line-clamp-2">{message.message}</p>
+                                                        {message.status === 'unread' && (
+                                                            <Button
+                                                                onClick={() => handleMarkAsRead(message.id)}
+                                                                size="small"
+                                                                variant="outline"
+                                                                className="mt-2"
+                                                            >
+                                                                Tandai sebagai Dibaca
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <ScrollArea className="h-[350px]">
-                                            <div className="divide-y">
-                                                {notifications.map((notification) => (
-                                                    <div key={notification.id} className="flex items-start gap-3 p-4 hover:bg-gray-50">
-                                                        <Avatar className="h-10 w-10">
+                                    </ScrollArea>
+                                </Card>
+                            </PopoverContent>
+                        </Popover>
+                        {/* Notifications Popover (Mobile) */}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="ghost" size="icon" className="relative">
+                                    <Bell className="h-5 w-5" />
+                                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
+                                        {notifications.length}
+                                    </span>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-screen max-w-[290px] p-0" align="end" alignOffset={-8} sideOffset={8}>
+                                <Card className="shadow-lg">
+                                    <div className="p-4 border-b">
+                                        <h2 className="text-lg font-semibold">Notifications</h2>
+                                    </div>
+                                    <ScrollArea className="h-[250px] md:h-[300px]">
+                                        <div className="divide-y">
+                                            {notifications.length === 0 ? (
+                                                <div className="p-4 text-center text-gray-600">No new notifications</div>
+                                            ) : (
+                                                notifications.map((notification) => (
+                                                    <div key={notification.id} className="flex items-start gap-2 p-3 hover:bg-gray-50">
+                                                        <Avatar className="h-8 w-8">
                                                             <AvatarImage src={notification.avatar || "/placeholder.svg?height=40&width=40"} />
                                                             <AvatarFallback>{notification.title[0]}</AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex-1 space-y-1">
                                                             <p className="text-sm font-medium text-black">{notification.title}</p>
-                                                            <p className="text-sm text-gray-600">{notification.description}</p>
+                                                            <p className="text-sm text-gray-600 line-clamp-2">{notification.description}</p>
                                                         </div>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </ScrollArea>
-                                    </Card>
-                                </PopoverContent>
-                            </Popover>
+                                                ))
+                                            )}
+                                        </div>
+                                    </ScrollArea>
+                                </Card>
+                            </PopoverContent>
+                        </Popover>
+
+                            {/* Logout Button (Mobile/Tablet) */}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onLogout}
+                                className="lg:hidden"
+                            >
+                                <LogOut className="h-5 w-5 text-red-600" />
+                            </Button>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </header>

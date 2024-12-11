@@ -32,6 +32,8 @@ const DashboardLayout = ({ children }) => {
         return 'Kuy Point';
       case '/users':
         return 'Users';
+      case '/blog':
+        return 'Blog';
       case '/settings':
         return 'Settings';
       default:
@@ -47,6 +49,7 @@ const DashboardLayout = ({ children }) => {
       'Yuk Buang': '/yuk-buang',
       'Kuy Point': '/kuy-point',
       'Users': '/users',
+      'Blog': '/blog',
       'Settings': '/settings'
     };
 
@@ -80,6 +83,7 @@ const DashboardLayout = ({ children }) => {
           pageTitle={activeItem} 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onLogout={handleLogout} 
         />
         <div className="p-4 sm:p-6">
           {React.cloneElement(children, { searchQuery })}
